@@ -10,6 +10,7 @@
 package me.corsin.javatools.http;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -38,6 +39,7 @@ public class ServerRequest {
 	private HttpMethod httpMethod;
 	private Class<?> expectedResponseType;
 	private IResponseTransformer responseTransformer;
+	private boolean hasRawData;
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -90,7 +92,7 @@ public class ServerRequest {
 					finalUrl += "&";
 				}
 				try {
-					finalUrl += parameter.getName() + "="  + URLEncoder.encode(parameter.getValue(), "UTF-8");
+					finalUrl += parameter.getName() + "="  + URLEncoder.encode(parameter.getValue().toString(), "UTF-8");
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
@@ -113,7 +115,7 @@ public class ServerRequest {
 				try {
 					parametersString.append(parameter.getName());
 					parametersString.append('=');
-					parametersString.append(URLEncoder.encode(parameter.getValue(), "UTF-8"));
+					parametersString.append(URLEncoder.encode(parameter.getValue().toString(), "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
@@ -132,16 +134,15 @@ public class ServerRequest {
 		this.addParameter(new Parameter(name, value));
 	}
 	
+	public void addParameter(String name, Object value, String fileName) {
+		this.addParameter(new Parameter(name, value, fileName));
+	}
+	
 	public void addParameter(Parameter parameter) {
 		this.parameters.add(parameter);
-	}
-	
-	public void addModule(long id) {
-		this.addModule(Long.toString(id));
-	}
-	
-	public void addModule(String module) {
-		this.url += "/" + module;
+		if (parameter.isRawData()) {
+			this.hasRawData = true;
+		}
 	}
 	
 	public void generate() throws MalformedURLException {
@@ -149,20 +150,56 @@ public class ServerRequest {
 		case POST:
 		case PUT:
 			this.generatedURL = new URL(this.getURL());
-			this.contentType = "application/x-www-form-urlencoded";
 			
-			try {
-				String content = this.parametersToString();
-				byte[] contentBytes = content.getBytes("UTF-8");
-				ByteArrayInputStream bais = new ByteArrayInputStream(contentBytes);
-				this.body = bais;
-				this.contentLength = contentBytes.length;
-			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			if (this.hasRawData) {
+				if (this.parameters.size() > 1) {
+					HttpMultipartGenerator multipartGenerator = new HttpMultipartGenerator("UTF-8");
+					this.contentType = multipartGenerator.getContentType();
+					
+					try {
+						for (Parameter parameter : this.parameters) {
+							if (parameter.isRawData()) {
+								if (parameter.getValue() instanceof InputStream) {
+									multipartGenerator.appendParameter(parameter.getName(), (InputStream)parameter.getValue(), parameter.getFileName());
+								} else if (parameter.getValue() instanceof byte[]) {
+									multipartGenerator.appendParameter(parameter.getName(), (byte[])parameter.getValue(), parameter.getFileName());
+								} else {
+									throw new RuntimeException("Unknown raw data type");
+								}
+							} else {
+								String value = parameter.getValue().toString();
+								multipartGenerator.appendParameter(parameter.getName(), value);
+							}
+						}
+						this.body = multipartGenerator.generateBody();
+						this.contentLength  = multipartGenerator.getContentLength();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+					
+				} else {
+					this.contentType = "application/octet-stream";
+					Object value = this.parameters.get(0).getValue();
+					
+					if (value instanceof byte[]) {
+						this.body = new ByteArrayInputStream((byte[])value);
+					} else {
+						this.body = (InputStream)value;
+					}
+				}
+			} else {
+				this.contentType = "application/x-www-form-urlencoded";
+				
+				try {
+					String content = this.parametersToString();
+					byte[] contentBytes = content.getBytes("UTF-8");
+					ByteArrayInputStream bais = new ByteArrayInputStream(contentBytes);
+					this.body = bais;
+					this.contentLength = contentBytes.length;
+				} catch (UnsupportedEncodingException e) {
+					e.printStackTrace();
+				}
 			}
-			
-			this.headers.put("Content-Type", this.contentType);
-			this.headers.put("Content-Length", Long.toString(this.contentLength));
 			
 			break;
 			

@@ -1,4 +1,6 @@
 package me.corsin.javatools.http;
+
+import java.io.InputStream;
 /////////////////////////////////////////////////
 // Project : exiled-api
 // Package : com.kerious.exiled.masterserver.api.communicator
@@ -9,7 +11,6 @@ package me.corsin.javatools.http;
 ////////
 
 
-
 public class Parameter {
 
 	////////////////////////
@@ -17,7 +18,8 @@ public class Parameter {
 	////////////////
 	
 	private String name;
-	private String value;
+	private Object value;
+	private String fileName;
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -26,6 +28,12 @@ public class Parameter {
 	public Parameter(String name, String value) {
 		this.name = name;
 		this.value = value;
+	}
+	
+	public Parameter(String name, Object value, String fileName) {
+		this.name = name;
+		this.value = value;
+		this.fileName = fileName;
 	}
 
 	////////////////////////
@@ -44,11 +52,24 @@ public class Parameter {
 		this.name = name;
 	}
 
-	public final String getValue() {
+	public final Object getValue() {
 		return value;
 	}
 
-	public final void setValue(String value) {
+	public final void setValue(Object value) {
 		this.value = value;
 	}
+	
+	public String getFileName() {
+		return fileName;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+	
+	public final boolean isRawData() {
+		return this.value instanceof byte[] || this.value instanceof InputStream;
+	}
+
 }
