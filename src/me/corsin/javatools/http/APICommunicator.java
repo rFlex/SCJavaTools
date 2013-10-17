@@ -20,7 +20,7 @@ import me.corsin.javatools.io.IOUtils;
 public class APICommunicator {
 	
 	public static interface IResponseTransformer {
-		Object transformResponse(InputStream inputStream) throws Throwable;
+		Object transformResponse(InputStream inputStream, Class<?> expectedOutputResponse) throws Throwable;
 	}
 	
 	////////////////////////
@@ -37,7 +37,7 @@ public class APICommunicator {
 		this.setResponseTransformer(new IResponseTransformer() {
 			
 			@Override
-			public Object transformResponse(InputStream inputStream) throws Throwable {
+			public Object transformResponse(InputStream inputStream, Class<?> expectedOutputResponse) throws Throwable {
 				return IOUtils.readStreamAsString(inputStream);
 			}
 		});
@@ -50,7 +50,7 @@ public class APICommunicator {
 	public Object getResponse(ServerRequest request) throws Throwable {
 		request.generate();
 		
-		return this.getResponse(request.getGeneratedURL(), request.getHttpMethod().toString(), request.getHeaders(), request.getBody());
+		return this.getResponse(request.getGeneratedURL(), request.getHttpMethod().toString(), request.getHeaders(), request.getBody(), request.getExpectedResponseType());
 	}
 	
 	public Object getResponse(String url) throws Throwable {
@@ -58,10 +58,10 @@ public class APICommunicator {
 	}
 	
 	public Object getResponse(String url, String httpMethod, Map<String, String> headers, InputStream body) throws Throwable {
-		return this.getResponse(new URL(url), httpMethod, headers, body);
+		return this.getResponse(new URL(url), httpMethod, headers, body, null);
 	}
 	
-	public Object getResponse(URL url, String httpMethod, Map<String, String> headers, InputStream body) throws Throwable {
+	public Object getResponse(URL url, String httpMethod, Map<String, String> headers, InputStream body, Class<?> expectedResponseType) throws Throwable {
 		Object response = null;
 		
 		HttpURLConnection connection = (HttpURLConnection)url.openConnection();
@@ -85,7 +85,7 @@ public class APICommunicator {
 			InputStream toReceive = connection.getInputStream();
 			
 			if (this.getResponseTransformer() != null) {
-				response = this.getResponseTransformer().transformResponse(toReceive);
+				response = this.getResponseTransformer().transformResponse(toReceive, expectedResponseType);
 			} else {
 				response = IOUtils.readStreamAsString(toReceive);
 			}

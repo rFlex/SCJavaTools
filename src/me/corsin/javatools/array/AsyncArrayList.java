@@ -1,4 +1,3 @@
-package me.corsin.javatools.array;
 /////////////////////////////////////////////////
 // Project : kerious-framework
 // Package : com.kerious.framework.utils
@@ -8,7 +7,7 @@ package me.corsin.javatools.array;
 // File created on Dec 9, 2012 at 1:02:55 AM
 ////////
 
-
+package me.corsin.javatools.array;
 
 import java.util.ArrayList;
 import java.util.Iterator;

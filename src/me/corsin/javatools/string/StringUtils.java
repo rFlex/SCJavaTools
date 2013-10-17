@@ -85,6 +85,15 @@ public class StringUtils {
 		
 		return sb.toString();
 	}
+	
+	public static boolean contains(String str, char c) {
+		for (int i = 0, length = str.length(); i < length; i++) {
+			if (c == str.charAt(i)) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	////////////////////////
 	// GETTERS/SETTERS

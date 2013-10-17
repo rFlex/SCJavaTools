@@ -1,4 +1,3 @@
-package me.corsin.javatools.http;
 /////////////////////////////////////////////////
 // Project : exiled-masterserver
 // Package : com.kerious.exiled.masterserver.api
@@ -8,7 +7,7 @@ package me.corsin.javatools.http;
 // File created on Jan 11, 2013 at 1:28:13 PM
 ////////
 
-
+package me.corsin.javatools.http;
 
 public enum HttpMethod {
 	GET,
