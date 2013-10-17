@@ -10,9 +10,14 @@
 package me.corsin.javatools.dynamictext;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-public class Samples {
+import me.corsin.javatools.test.Test;
+import me.corsin.javatools.test.TestCase;
+import me.corsin.javatools.test.TestRunner;
+
+public class Tests extends Test {
 
 	////////////////////////
 	// MODELS
@@ -41,7 +46,7 @@ public class Samples {
 		
 		public Core(double frequency) {
 			this.frequency = frequency;
-			this.features = new ArrayList<Samples.Feature>();
+			this.features = new ArrayList<Tests.Feature>();
 		}
 
 		public double getFrequency() {
@@ -109,13 +114,17 @@ public class Samples {
 	public static class DynamicTextDelegate {
 		
 		
-		public String getCommaForLineNumber(Integer lineNumber) {
-			if (lineNumber == 0) {
-				return "";
-			}
-			return ", ";
+		public boolean isFirstLine(Integer lineNumber) {
+			return lineNumber == 0;
 		}
 		
+		public boolean isLastLine(Integer lineNumber, Collection<?> collection) {
+			return collection.size() == lineNumber;
+		}
+		
+		public boolean isMoreThanZero(Integer number) {
+			return number > 0;
+		}
 	}
 
 	////////////////////////
@@ -125,64 +134,92 @@ public class Samples {
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-
+	
 	////////////////////////
 	// METHODS
 	////////////////
 	
-	private static void shortTest() {
+	@TestCase
+	public void shortTest() {
 		DynamicText dynamicText = new DynamicText();
-		dynamicText.setText("My CPU is a {processorName} running at {frequency}Mhz\n");
+		dynamicText.setText("My CPU is a {processorName} running at {frequency}Mhz");
 		dynamicText.put("processorName", "AMD K6");
 		dynamicText.put("frequency", 300);
 		
-		System.out.println(dynamicText.toString());
+		
+		String expectedOutput = "My CPU is a AMD K6 running at 300Mhz";
+		
+		ensureEquals(expectedOutput, dynamicText.toString());
 	}
 	
-	private static void methodCallTest() {
+	@TestCase
+	public void methodCallTest() {
 		CPU cpu = new CPU("AMD Athlon", 1.2);
 		
 		DynamicText dynamicText = new DynamicText();
-		dynamicText.setText("My CPU is a {cpu.name} running at {cpu.frequency}Ghz\n");
+		dynamicText.setText("My CPU is a {cpu.name} running at {cpu.getFrequency()}Ghz"); // We could use {cpu.frequency} as well
 		dynamicText.put("cpu", cpu);
 		
-		System.out.println(dynamicText.toString());
+		
+		String expectedOutput = "My CPU is a AMD Athlon running at 1.2Ghz";
+		
+		ensureEquals(expectedOutput, dynamicText.toString());
 	}
 	
-	private static void repeaterTest() {
+	@TestCase
+	public void conditionalTest() {
 		CPU cpu = new CPU("AMD Athlon X2", 2.2);
 		cpu.getCores().add(new Core(2.2));
 		cpu.getCores().add(new Core(1.6));
 		
 		String text = "" +
 				"My CPU is a {cpu.name} with a max speed of {cpu.frequency}Ghz\n" +
+				"{? cpu.x64 :64bits compatible}" +
+				"{? !cpu.x64 :32bits compatible}";
+		
+		DynamicText dynamicText = new DynamicText(text);
+		dynamicText.put("cpu", cpu);
+		
+		
+		String expectedOutput = "" +
+				"My CPU is a AMD Athlon X2 with a max speed of 2.2Ghz\n" +
+				"32bits compatible";
+		
+		ensureEquals(expectedOutput, dynamicText.toString());
+	}
+	
+	@TestCase
+	public void repeaterTest() {
+		CPU cpu = new CPU("AMD Athlon 64", 2.8);
+		cpu.setX64(true);
+		cpu.getCores().add(new Core(2.8));
+		cpu.getCores().add(new Core(2.4));
+		
+		String text = "" +
+				"My CPU is a {cpu.name} with a max speed of {cpu.frequency}Ghz\n" +
+				"{? cpu.x64 :64bits compatible\n}" +
+				"{? !cpu.x64 :32bits compatible\n}" +
 				"Which has {cpu.cores.size} cores:\n" +
 				"[cpu.cores->core:Core #{#number} - Currently running at {core.frequency}Ghz\n]";
 		
 		DynamicText dynamicText = new DynamicText(text);
 		dynamicText.put("cpu", cpu);
 		
-		System.out.println(dynamicText);
+	
+		String expectedOutput = "" +
+				"My CPU is a AMD Athlon 64 with a max speed of 2.8Ghz\n" +
+				"64bits compatible\n" +
+				"Which has 2 cores:\n" +
+				"Core #0 - Currently running at 2.8Ghz\n" +
+				"Core #1 - Currently running at 2.4Ghz\n";
+
+		ensureEquals(expectedOutput, dynamicText.toString());
 	}
 	
-	private static void conditionalTest() {
-//		CPU cpu = new CPU("AMD Athlon 64", 2.8);
-//		cpu.getCores().add(new Core(2.8));
-//		cpu.getCores().add(new Core(2.4));
-//		
-//		String text = "" +
-//				"My CPU is a {cpu.name} with a max speed of {cpu.frequency}Ghz\n" +
-//				"Which has {cpu.cores.size} cores:\n" +
-//				"[cpu.cores->core:Core #{#number} - Currently running at {core.frequency}Ghz\n]";
-//		
-//		DynamicText dynamicText = new DynamicText(text);
-//		dynamicText.put("cpu", cpu);
-//		
-//		System.out.println(dynamicText);
-	}
-	
-	private static void multiTest() {
+	@TestCase
+	public void multiTest() {
 		CPU cpu = new CPU("Intel core i7", 3.6);
+		cpu.setX64(true);
 		
 		Core c1 = new Core(3.6);
 		c1.getFeatures().add(new Feature("SSE"));
@@ -207,26 +244,38 @@ public class Samples {
 		
 		String text = "" +
 				"My CPU is a {cpu.name} with a max speed of {cpu.frequency}Ghz\n" +
+				"{? cpu.x64 :64bits compatible\n}" +
+				"{? !cpu.x64 :32bits compatible\n}" +
 				"Which has {cpu.cores.size} cores:\n" +
-				"[cpu.cores->core:Core #{#number} - Currently running at {core.frequency}Ghz\n" +
+				"[cpu.cores->core:Core #{#number} - Currently running at {core.frequency}Ghz\n" + //Repeating on each core
+				"{? delegate.isMoreThanZero(core.features.size):" + // Display the following only if it has more than one feature
 				"\tFeatures: " +
-				"[core.features->feature:{delegate.getCommaForLineNumber(#number)} {feature.name}]\n" +
+				"[core.features->feature:{? !delegate.isFirstLine(#number) :, } {feature.name}]\n" +
+				"}" + // End of the rendering condition
 				"]";
 		
 		DynamicText dynamicText = new DynamicText(text);
 		dynamicText.put("cpu", cpu);
 		dynamicText.put("delegate", new DynamicTextDelegate());
 		
-		System.out.println(dynamicText);
+		String expectedOutput = "" +
+				"My CPU is a Intel core i7 with a max speed of 3.6Ghz\n" +
+				"64bits compatible\n" +
+				"Which has 4 cores:\n" +
+				"Core #0 - Currently running at 3.6Ghz\n" +
+				"\tFeatures:  SSE,  SSE2,  SSE3,  SSE4,  Turbo,  Hyperthreading\n" +
+				"Core #1 - Currently running at 2.4Ghz\n" +
+				"\tFeatures:  SSE,  SSE2,  SSE3\n" +
+				"Core #2 - Currently running at 0.8Ghz\n" +
+				"Core #3 - Currently running at 0.8Ghz\n";
+		
+		ensureEquals(expectedOutput, dynamicText.toString());
 	}
 	
 	public static void main(String[] args) {
-		shortTest();
-		methodCallTest();
-		conditionalTest();
-		repeaterTest();
-		multiTest();
+		TestRunner.runSingleTest(Tests.class);
 	}
+	
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////

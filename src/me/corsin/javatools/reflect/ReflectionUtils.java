@@ -8,10 +8,13 @@ package me.corsin.javatools.reflect;
 // File created on Aug 20, 2013 at 1:44:09 PM
 ////////
 
-
-
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+
+import me.corsin.javatools.misc.Pair;
 
 public class ReflectionUtils {
 
@@ -161,6 +164,20 @@ public class ReflectionUtils {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+
+	@SuppressWarnings("unchecked")
+	public static <T extends Annotation> Pair<Method, T>[] getMethodsWithAnnotation(Class<?> cls, Class<T> annotationCls) {
+		List<Pair<Method, T>> methods = new ArrayList<Pair<Method, T>>();
+		
+		for (Method method : cls.getMethods()) {
+			T annotation = method.getAnnotation(annotationCls);
+			if (annotation != null) {
+				methods.add(new Pair<Method, T>(method, annotation));
+			}
+		}
+		
+		return methods.toArray(new Pair[methods.size()]);
 	}
 	
 	////////////////////////

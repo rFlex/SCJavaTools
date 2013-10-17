@@ -94,7 +94,7 @@ public class TextParser {
 		char actualChar = this.readChar();
 		
 		if (c != actualChar) {
-			throw new IOException("Bad character [" + actualChar + "]");
+			throw new IOException("Bad character [" + actualChar + "], expected [" + c + "]");
 		}
 	}
 	

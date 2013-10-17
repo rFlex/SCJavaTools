@@ -33,16 +33,16 @@ public class ContextObjectResolver implements ObjectResolver {
 	}
 	
 	public ContextObjectResolver(TextParser parser) throws IOException {
-		String variableName = parser.readUpTo(".,()").trim();
+		String variableName = parser.readUpTo(".,():").trim();
 
 		if (variableName.length() == 0) {
 			throw new InvalidTextException("Empty identifier");
 		}
-		
+
 		this.contextVariableName = variableName;
 		
 		while (!parser.isEmpty() && parser.tryRead('.')) {
-			String identifier = parser.readUpTo(".,()").trim();
+			String identifier = parser.readUpTo(".,():").trim();
 			
 			if (identifier.length() == 0) {
 				throw new InvalidTextException("Empty identifier after a '.'");
@@ -58,12 +58,13 @@ public class ContextObjectResolver implements ObjectResolver {
 					String parameters = parser.readScope('(', ')').trim();
 					newResolver = new MethodObjectResolver(identifier, parameters);
 					break;
+				case ':':
 				case ',':
 				case ')':
 				case '.':
 					newResolver = new PropertyObjectResolver(identifier);
-						parser.back();
-						break;
+					parser.back();
+					break;
 				}
 			} else {
 				newResolver = new PropertyObjectResolver(identifier);

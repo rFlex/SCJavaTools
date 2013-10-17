@@ -26,7 +26,14 @@ public class EvaluatorExpression implements Expression {
 	////////////////
 	
 	public EvaluatorExpression(String evalBlock) throws IOException {
-		this.contextObjectResolver = new ContextObjectResolver(new TextParser(evalBlock));
+		TextParser parser = new TextParser(evalBlock);
+		parser.readIgnore();
+		
+		if (parser.tryRead('?')) {
+			this.contextObjectResolver = new ConditionalObjectResolver(parser);
+		} else {
+			this.contextObjectResolver = new ContextObjectResolver(parser);
+		}
 	}
 
 	////////////////////////
