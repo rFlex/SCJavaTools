@@ -41,11 +41,19 @@ public class DynamicText implements Expression {
 		this.expressions = new ArrayList<Expression>();
 		this.context = context;
 		this.setText(text);
+		
+		if (context != null) {
+			this.initializeBaseExpressions(context);
+		}
 	}
 
 	////////////////////////
 	// METHODS
 	////////////////
+	
+	private void initializeBaseExpressions(Context context) {
+		context.put("#if", new If());
+	}
 	
 	private void clear() {
 		this.expressions.clear();
@@ -71,7 +79,6 @@ public class DynamicText implements Expression {
 				if (!textExpression.isEmpty()) {
 					this.expressions.add(new TextExpression(textExpression));
 				}
-				
 				
 				if (!parser.isEmpty()) {
 					char c = parser.readChar();

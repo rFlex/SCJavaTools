@@ -73,6 +73,8 @@ public class RepeaterExpression implements Expression {
 			return "";
 		}
 		
+		context.put("#" + this.variableToSetName, collection);
+		
 		StringBuilder output = new StringBuilder();
 		if (collection instanceof Object[]) {
 			Object[] array = (Object[])collection;
@@ -93,6 +95,9 @@ public class RepeaterExpression implements Expression {
 		} else {
 			output.append("RepeaterExpression:{Expects an Array or an Iterable object}");
 		}
+		
+		context.remove("#" + this.variableToSetName);
+		
 		return output.toString();
 	}
 	
