@@ -1,6 +1,5 @@
-package me.corsin.javatools.array;
-/////////////////////////////////////////////////
 // Project : kerious-framework
+/////////////////////////////////////////////////
 // Package : com.kerious.framework.utils
 // ExtensibleArray.java
 //
@@ -8,9 +7,10 @@ package me.corsin.javatools.array;
 // File created on Jan 31, 2013 at 6:48:19 PM
 ////////
 
-
+package me.corsin.javatools.array;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public abstract class ExtensibleArray<T> {
 
@@ -18,8 +18,8 @@ public abstract class ExtensibleArray<T> {
 	// VARIABLES
 	////////////////
 
-	private ArrayList<T> positiveArray;
-	private ArrayList<T> negativeArray;
+	private List<T> positiveArray;
+	private List<T> negativeArray;
 	
 	////////////////////////
 	// CONSTRUCTORS
@@ -40,7 +40,7 @@ public abstract class ExtensibleArray<T> {
 	// GETTERS/SETTERS
 	////////////////
 
-	private final T get(int index, ArrayList<T> array) {
+	private final T get(int index, List<T> array) {
 		while (index >= array.size()) {
 			array.add(this.createNode());
 		}

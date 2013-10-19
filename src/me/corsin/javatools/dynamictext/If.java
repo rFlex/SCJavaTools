@@ -39,6 +39,10 @@ public class If {
 		return number.doubleValue() > 0.0;
 	}
 	
+	public boolean equalsZero(Number number) {
+		return number.doubleValue() == 0;
+	}
+	
 	public boolean lessThanZero(Number number) {
 		return number.doubleValue() < 0.0;
 	}

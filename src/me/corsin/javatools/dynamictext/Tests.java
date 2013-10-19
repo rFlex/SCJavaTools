@@ -10,7 +10,6 @@
 package me.corsin.javatools.dynamictext;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import me.corsin.javatools.test.Test;
@@ -110,22 +109,6 @@ public class Tests extends Test {
 			return this.x64;
 		}
 	}
-	
-	public static class DynamicTextDelegate {
-		
-		
-		public boolean isFirstLine(Integer lineNumber) {
-			return lineNumber == 0;
-		}
-		
-		public boolean isLastLine(Integer lineNumber, Collection<?> collection) {
-			return collection.size() == lineNumber;
-		}
-		
-		public boolean isMoreThanZero(Integer number) {
-			return number > 0;
-		}
-	}
 
 	////////////////////////
 	// VARIABLES
@@ -200,7 +183,7 @@ public class Tests extends Test {
 				"{? cpu.x64 :64bits compatible\n}" +
 				"{? !cpu.x64 :32bits compatible\n}" +
 				"Which has {cpu.cores.size} cores:\n" +
-				"[cpu.cores->core:Core #{#number} - Currently running at {core.frequency}Ghz\n]";
+				"[cpu.cores->core:Core #{#coreNumber} - Currently running at {core.frequency}Ghz\n]";
 		
 		DynamicText dynamicText = new DynamicText(text);
 		dynamicText.put("cpu", cpu);
@@ -247,16 +230,15 @@ public class Tests extends Test {
 				"{? cpu.x64 :64bits compatible\n}" +
 				"{? !cpu.x64 :32bits compatible\n}" +
 				"Which has {cpu.cores.size} cores:\n" +
-				"[cpu.cores->core:Core #{#number} - Currently running at {core.frequency}Ghz\n" + //Repeating on each core
-				"{? delegate.isMoreThanZero(core.features.size):" + // Display the following only if it has more than one feature
+				"[cpu.cores->core:Core #{#coreNumber} - Currently running at {core.frequency}Ghz\n" + //Repeating on each core
+				"{? #if.greaterThanZero(core.features.size):" + // Display the following only if it has more than one feature
 				"\tFeatures: " +
-				"[core.features->feature:{? !delegate.isFirstLine(#number) :, } {feature.name}]\n" +
+				"[core.features->feature:{? !#if.equalsZero(#featureNumber) :, } {feature.name}]\n" +
 				"}" + // End of the rendering condition
 				"]";
 		
 		DynamicText dynamicText = new DynamicText(text);
 		dynamicText.put("cpu", cpu);
-		dynamicText.put("delegate", new DynamicTextDelegate());
 		
 		String expectedOutput = "" +
 				"My CPU is a Intel core i7 with a max speed of 3.6Ghz\n" +

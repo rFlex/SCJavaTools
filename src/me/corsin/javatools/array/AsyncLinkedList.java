@@ -1,6 +1,5 @@
-package me.corsin.javatools.array;
-/////////////////////////////////////////////////
 // Project : killing-sight
+/////////////////////////////////////////////////
 // Package : com.kerious.killingsight.utils
 // AsyncLinkedList.java
 //
@@ -8,7 +7,7 @@ package me.corsin.javatools.array;
 // File created on Oct 28, 2012 at 1:40:02 AM
 ////////
 
-
+package me.corsin.javatools.array;
 
 import java.util.ArrayList;
 import java.util.Iterator;

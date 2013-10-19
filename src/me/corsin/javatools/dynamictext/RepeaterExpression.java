@@ -51,12 +51,13 @@ public class RepeaterExpression implements Expression {
 	////////////////
 	
 	private void renderLine(Object object, Context context, int lineNumber, StringBuilder output) {
-		context.put("#number", lineNumber);
+		String lineNumberInput = "#" + this.variableToSetName + "Number";
+		context.put(lineNumberInput, lineNumber);
 		context.put(this.variableToSetName, object);
 
 		output.append(this.repeatBlock.renderForContext(context));
 		
-		context.remove("#number");
+		context.remove(lineNumberInput);
 		context.remove(this.variableToSetName);
 	}
 	
