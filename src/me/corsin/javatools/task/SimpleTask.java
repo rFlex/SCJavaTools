@@ -1,23 +1,21 @@
 /////////////////////////////////////////////////
 // Project : SCJavaTools
 // Package : me.corsin.javatools.task
-// Task.java
+// SimpleTask.java
 //
 // Author : Simon CORSIN <simoncorsin@gmail.com>
-// File created on Oct 19, 2013 at 2:26:50 PM
+// File created on Oct 19, 2013 at 2:29:09 PM
 ////////
 
 package me.corsin.javatools.task;
 
-public abstract class Task<T> extends AbstractTask<Task<T>, Task.TaskListener<T>> {
+public abstract class SimpleTask extends AbstractTask<SimpleTask, SimpleTask.TaskListener> {
 
-	public static interface TaskListener<T> extends ITaskListener<Task<T>> { }
+	public static interface TaskListener extends ITaskListener<SimpleTask> { }
 
 	////////////////////////
 	// VARIABLES
 	////////////////
-	
-	private T returnedValue;
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -26,21 +24,15 @@ public abstract class Task<T> extends AbstractTask<Task<T>, Task.TaskListener<T>
 	////////////////////////
 	// METHODS
 	////////////////
-
-	protected abstract T perform() throws Throwable;
+	
+	protected abstract void perform() throws Throwable;
 	
 	@Override
 	protected void handle() throws Throwable {
-		this.returnedValue = this.perform();
+		this.perform();
 	}
 
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
-	
-	public T getReturnedValue() {
-		this.waitCompletion();
-		return returnedValue;
-	}
-
 }

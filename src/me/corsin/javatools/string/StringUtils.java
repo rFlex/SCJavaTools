@@ -9,6 +9,12 @@
 
 package me.corsin.javatools.string;
 
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
 import java.util.Date;
 import java.util.Random;
 
@@ -93,6 +99,23 @@ public class StringUtils {
 			}
 		}
 		return false;
+	}
+	
+	public static String cleanString(String str) {
+		Charset charset = Charset.forName("UTF-8");
+		CharsetDecoder utf8Decoder = charset.newDecoder();
+		utf8Decoder.onMalformedInput(CodingErrorAction.IGNORE);
+		utf8Decoder.onUnmappableCharacter(CodingErrorAction.IGNORE);
+		ByteBuffer bytes = ByteBuffer.wrap(str.getBytes(charset));
+		CharBuffer parsed;
+		
+		try {
+			parsed = utf8Decoder.decode(bytes);
+			return parsed.toString();
+		} catch (CharacterCodingException e) {
+			return "";
+		}
+		
 	}
 
 	////////////////////////

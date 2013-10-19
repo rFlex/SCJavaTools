@@ -10,8 +10,6 @@
 package me.corsin.javatools.task;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -24,9 +22,11 @@ public class TaskQueue implements Disposable {
 	// VARIABLES
 	////////////////
 	
-	final protected List<Task> pendingTasks;
-	final private Queue<Task> tasks;
-	private int id;
+	// This variable is notified each time a Runnable is added or when it is empty
+	final private Queue<Runnable> tasks;
+	// This variable is notified when it reaches zero
+	private Object tasksReachesZero;
+	private int runningTasks;
 	private boolean disposed;
 
 	////////////////////////
@@ -34,65 +34,101 @@ public class TaskQueue implements Disposable {
 	////////////////
 	
 	public TaskQueue() {
-		this.tasks = new ArrayDeque<Task>();
-		this.pendingTasks = new ArrayList<Task>();
+		this.tasks = new ArrayDeque<Runnable>();
+		this.tasksReachesZero = new Object();
+		this.runningTasks = 0;
 	}
 
 	////////////////////////
 	// METHODS
 	////////////////
 	
-	public void flushTasks() {
-		synchronized (this) {
-			synchronized (this.pendingTasks) {
-				for (int i = 0, size = this.pendingTasks.size(); i < size; i++) {
-					this.tasks.add(this.pendingTasks.get(i));
+	private Runnable getNextTask() {
+		Runnable task = null;
+		synchronized (this.tasks) {
+			if (!this.tasks.isEmpty()) {
+				task = this.tasks.poll();
+				if (this.tasks.isEmpty()) {
+					this.tasks.notifyAll();
 				}
-				this.pendingTasks.clear();
 			}
-			
-			while (!this.tasks.isEmpty() && !this.disposed) {
-				final Task task = this.tasks.poll();
-				
+		}
+		return task;
+	}
+	
+	public boolean handleNextTask() {
+		Runnable task = this.getNextTask();
+		
+		if (task != null) {
+			synchronized (this.tasksReachesZero) {
+				this.runningTasks++;
+			}
+			try {
 				task.run();
-				
-				synchronized (task) {
-					task.notifyAll();
+			} catch (Throwable t) {
+				t.printStackTrace();
+			}
+			
+			synchronized (this.tasksReachesZero) {
+				this.runningTasks--;
+				if (this.runningTasks == 0) {
+					this.tasksReachesZero.notifyAll();
 				}
 			}
 			
-			this.notifyAll();
+			synchronized (task) {
+				task.notifyAll();
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	public void flushTasks() {
+		while (!this.disposed && this.handleNextTask()) {
+			
 		}
 	}
 	
 	@Override
 	public void dispose() {
 		this.disposed = true;
-	}
-	
-	public void executeAsync(Task task) {
-		synchronized (this.pendingTasks) {
-			this.pendingTasks.add(task);
-			this.pendingTasks.notifyAll();
+		synchronized (this.tasks) {
+			this.tasks.clear();
+			this.tasks.notifyAll();
 		}
 	}
 	
-	public void executeSync(Task task) {
-		this.executeAsync(task);
-		task.waitCompletion();
+	public void executeAsync(Runnable runable) {
+		synchronized (this.tasks) {
+			this.tasks.add(runable);
+			// Notify that a task has been added
+			this.tasks.notifyAll();
+		}
 	}
 	
-	public void executeSyncTimed(Task task, long inMs) {
+	public void executeSync(Runnable runnable) {
+		synchronized (runnable) {
+			this.executeAsync(runnable);
+			try {
+				runnable.wait();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void executeSyncTimed(Runnable runnable, long inMs) {
 		try {
 			Thread.sleep(inMs);
-			this.executeSync(task);
+			this.executeSync(runnable);
 		} catch (InterruptedException e) {
-			
+			e.printStackTrace();
 		}
 	}
 	
-	public void executeAsyncTimed(Task task, long inMs) {
-		final Task theTask = task;
+	public void executeAsyncTimed(Runnable runnable, long inMs) {
+		final Runnable theRunnable = runnable;
 		
 		// This implementation is not really suitable for now as the timer uses its own thread
 		// The TaskQueue itself should be able in the future to handle this without using a new thread
@@ -101,23 +137,39 @@ public class TaskQueue implements Disposable {
 			
 			@Override
 			public void run() {
-				executeAsync(theTask);
+				executeAsync(theRunnable);
 			}
 		}, inMs);
 	}
 	
-	public void waitAllTasks() {
-		synchronized (this) {
-			boolean hasTaskPending = false;
-			synchronized (this.pendingTasks) {
-				hasTaskPending = this.hasTaskPending();
-			}
-			
-			if (hasTaskPending) {
+	protected void waitForTasks() {
+		synchronized (this.tasks) {
+			while (!this.disposed && !this.hasTaskPending()) {
 				try {
-					this.wait();
+					this.tasks.wait();
 				} catch (InterruptedException e) {
 					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public void waitAllTasks() {
+		synchronized (this.tasks) {
+			while (this.hasTaskPending()) {
+				try {
+					this.tasks.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			synchronized (this.tasksReachesZero) {
+				if (this.runningTasks > 0) {
+					try {
+						this.tasksReachesZero.wait();
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 		}
@@ -128,17 +180,13 @@ public class TaskQueue implements Disposable {
 	////////////////
 
 	public boolean hasTaskPending() {
-		return !this.pendingTasks.isEmpty();
+		return !this.tasks.isEmpty();
 	}
-
-	public int getId() {
-		return id;
+	
+	public int getRunningTasks() {
+		return this.runningTasks;
 	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
+	
 	@Override
 	public boolean isDisposed() {
 		return this.disposed;

@@ -9,55 +9,24 @@
 
 package me.corsin.javatools.task;
 
-import me.corsin.javatools.misc.Disposable;
-
-public class SingleThreadedTaskQueue extends TaskQueue implements Runnable, Disposable {
+public class SingleThreadedTaskQueue extends MultiThreadedTaskQueue {
 
 	////////////////////////
 	// VARIABLES
 	////////////////
 	
-	private Thread thread;
-
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
 	
 	public SingleThreadedTaskQueue() {
-		this.thread = new Thread(this);
-		this.thread.start();
+		super(1);
 	}
 
 	////////////////////////
 	// METHODS
 	////////////////
 	
-	@Override
-	public void run() {
-		while (!this.isDisposed()) {
-			synchronized (this.pendingTasks) {
-				if (this.pendingTasks.isEmpty()) {
-					try {
-						this.pendingTasks.wait();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-			this.flushTasks();
-		}
-	}
-	
-	@Override
-	public void dispose() {
-		super.dispose();
-		this.thread = null;
-		
-		synchronized (this.pendingTasks) {
-			this.pendingTasks.notifyAll();
-		}
-	}
-
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
