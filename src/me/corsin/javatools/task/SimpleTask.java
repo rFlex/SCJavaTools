@@ -20,6 +20,14 @@ public abstract class SimpleTask extends AbstractTask<SimpleTask, SimpleTask.Tas
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
+	
+	public SimpleTask() {
+		
+	}
+	
+	public SimpleTask(Object creator) {
+		super(creator);
+	}
 
 	////////////////////////
 	// METHODS

@@ -9,14 +9,13 @@
 
 package me.corsin.javatools.task;
 
+import java.io.Closeable;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import me.corsin.javatools.misc.Disposable;
-
-public class TaskQueue implements Disposable {
+public class TaskQueue implements Closeable {
 
 	////////////////////////
 	// VARIABLES
@@ -27,7 +26,7 @@ public class TaskQueue implements Disposable {
 	// This variable is notified when it reaches zero
 	private Object tasksReachesZero;
 	private int runningTasks;
-	private boolean disposed;
+	private boolean closed;
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -85,14 +84,14 @@ public class TaskQueue implements Disposable {
 	}
 	
 	public void flushTasks() {
-		while (!this.disposed && this.handleNextTask()) {
+		while (!this.closed && this.handleNextTask()) {
 			
 		}
 	}
 	
 	@Override
-	public void dispose() {
-		this.disposed = true;
+	public void close() {
+		this.closed = true;
 		synchronized (this.tasks) {
 			this.tasks.clear();
 			this.tasks.notifyAll();
@@ -144,7 +143,7 @@ public class TaskQueue implements Disposable {
 	
 	protected void waitForTasks() {
 		synchronized (this.tasks) {
-			while (!this.disposed && !this.hasTaskPending()) {
+			while (!this.closed && !this.hasTaskPending()) {
 				try {
 					this.tasks.wait();
 				} catch (InterruptedException e) {
@@ -187,8 +186,7 @@ public class TaskQueue implements Disposable {
 		return this.runningTasks;
 	}
 	
-	@Override
-	public boolean isDisposed() {
-		return this.disposed;
+	public boolean isClosed() {
+		return this.closed;
 	}
 }

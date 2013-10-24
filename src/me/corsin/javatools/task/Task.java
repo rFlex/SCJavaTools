@@ -23,6 +23,14 @@ public abstract class Task<T> extends AbstractTask<Task<T>, Task.TaskListener<T>
 	// CONSTRUCTORS
 	////////////////
 
+	public Task() {
+		
+	}
+	
+	public Task(Object creator) {
+		super(creator);
+	}
+	
 	////////////////////////
 	// METHODS
 	////////////////

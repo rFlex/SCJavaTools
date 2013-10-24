@@ -40,15 +40,15 @@ public class MultiThreadedTaskQueue extends TaskQueue implements Runnable {
 
 	@Override
 	public void run() {
-		while (!this.isDisposed()) {
+		while (!this.isClosed()) {
 			this.waitForTasks();
 			this.flushTasks();
 		}
 	}
 	
 	@Override
-	public void dispose() {
-		super.dispose();
+	public void close() {
+		super.close();
 		this.threads = null;
 	}
 	

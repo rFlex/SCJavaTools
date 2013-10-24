@@ -67,7 +67,7 @@ public class IOUtils {
 			try {
 				saveArray(pictureBytes, stream);
 			} finally {
-				closeStream(stream);
+				closeStream((Closeable)stream);
 			}
 
 		} catch (FileNotFoundException e1) {

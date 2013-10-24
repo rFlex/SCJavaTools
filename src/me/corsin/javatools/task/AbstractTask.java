@@ -17,14 +17,24 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 	
 	private Throwable thrownException;
 	private boolean completed;
+	private boolean started;
 	private boolean canceled;
+	private boolean listenerCalled;
 	private TaskListenerType listener;
+	private Object listenerCalledLock;
+	private Object creator;
 
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
 	
 	public AbstractTask() {
+		this(null);
+	}
+	
+	public AbstractTask(Object creator) {
+		this.setCreator(creator);
+		this.listenerCalledLock = new Object();
 	}
 
 	////////////////////////
@@ -33,9 +43,10 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 	
 	protected abstract void handle() throws Throwable;
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
+		this.started = true;
+		this.listenerCalled = false;
 		try {
 			if (this.canceled) {
 				throw new Exception("Task cancelled");
@@ -43,14 +54,21 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 			
 			this.handle();
 			
-			synchronized (this) {
-				this.completed = true;
-			}
+			this.completed = true;
 		} catch (Throwable e) {
 			this.thrownException = e;
 		}
-		if (this.listener != null) {
-			this.listener.onCompleted((TaskType)this);
+		this.callListener();
+		this.started = false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void callListener() {
+		synchronized (this.listenerCalledLock) {
+			if (!this.listenerCalled && this.getListener() != null) {
+				this.listenerCalled = true;
+				this.getListener().onCompleted(this.getCreator(), (TaskType)this);
+			}
 		}
 	}
 	
@@ -90,7 +108,21 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 		return listener;
 	}
 
-	public void setListener(TaskListenerType listener) {
+	public AbstractTask<TaskType, TaskListenerType> setListener(TaskListenerType listener) {
 		this.listener = listener;
+		
+		if (this.started) {
+			this.callListener();
+		}
+		
+		return this;
+	}
+
+	public Object getCreator() {
+		return creator;
+	}
+
+	public void setCreator(Object creator) {
+		this.creator = creator;
 	}
 }

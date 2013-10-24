@@ -11,6 +11,6 @@ package me.corsin.javatools.task;
 
 public interface ITaskListener<T> {
 	
-	void onCompleted(T task);
+	void onCompleted(Object taskCreator, T task);
 
 }

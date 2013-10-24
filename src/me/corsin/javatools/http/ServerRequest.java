@@ -24,6 +24,8 @@ import java.util.Map;
 import me.corsin.javatools.http.APICommunicator.IResponseTransformer;
 import me.corsin.javatools.properties.InvalidConfigurationException;
 import me.corsin.javatools.properties.SharedProperties;
+import me.corsin.javatools.task.Task;
+import me.corsin.javatools.task.TaskQueue;
 
 public class ServerRequest {
 	
@@ -51,6 +53,7 @@ public class ServerRequest {
 	private HttpMethod httpMethod;
 	private Class<?> expectedResponseType;
 	private IResponseTransformer responseTransformer;
+	private TaskQueue taskQueue;
 	private boolean hasRawData;
 
 	////////////////////////
@@ -245,48 +248,30 @@ public class ServerRequest {
 		}
 	}
 	
-	public void getResponseAsync(final IResponseHandler responseHandler) {
-		if (responseHandler == null) {
-			throw new NullPointerException("responseHandler");
+	public Task<Object> getResponseAsync() {
+		Task<Object> task = new Task<Object>(this) {
+
+			@Override
+			protected Object perform() throws Throwable {
+				return getResponse();
+			}
+		};
+		
+		if (this.getTaskQueue() != null) {
+			this.getTaskQueue().executeAsync(task);
+		} else {
+			new Thread(task).start();
 		}
 		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				Throwable thrownException = null;
-				Object response = null;
-				try {
-					response = getResponse();
-				} catch (Throwable e) {
-					thrownException = e;
-				}
-				responseHandler.onResponseReceived(ServerRequest.this, response, thrownException);
-			}
-			
-		}).start();
+		return task;
 	}
 	
-	public <T> void getResponseAsync(final Class<T> responseType, final ITypedResponseHandler<T> responseHandler) {
-		if (responseHandler == null) {
-			throw new NullPointerException("responseHandler");
-		}
+	@SuppressWarnings("unchecked")
+	public <T> Task<T> getResponseAsync(final Class<T> responseType) {
+		this.setExpectedResponseType(responseType);
 		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				Throwable thrownException = null;
-				T response = null;
-				try {
-					response = getResponse(responseType);
-				} catch (Throwable e) {
-					thrownException = e;
-				}
-				responseHandler.onResponseReceived(ServerRequest.this, response, thrownException);
-			}
-			
-		}).start();
+		// Generics are not known in runtime, thus we can safely use the untyped method
+		return (Task<T>)this.getResponseAsync();
 	}
 	
 	public Object getResponse() throws Throwable {
@@ -295,7 +280,7 @@ public class ServerRequest {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T getResponse(Class<T> responseNodeType) throws Throwable {
-		this.expectedResponseType = responseNodeType;
+		this.setExpectedResponseType(responseNodeType);
 		
 		APICommunicator communicator = new APICommunicator();
 		
@@ -397,5 +382,13 @@ public class ServerRequest {
 		this.responseTransformer = responseTransformer;
 		
 		return this;
+	}
+
+	public TaskQueue getTaskQueue() {
+		return taskQueue;
+	}
+
+	public void setTaskQueue(TaskQueue taskQueue) {
+		this.taskQueue = taskQueue;
 	}
 }
