@@ -14,6 +14,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -98,6 +99,10 @@ public class IOUtils {
 		}
 
 		return fileContent;
+	}
+	
+	public static String readFileAsString(File file) throws IOException {
+		return readStreamAsString(new FileInputStream(file));
 	}
 	
 	public static byte[] readStream(InputStream stream) throws IOException {

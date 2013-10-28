@@ -43,7 +43,7 @@ public class RepeaterExpression implements Expression {
 		this.variableToSetName = identifier;
 		parser.readIgnore();
 		parser.read(':');
-		this.repeatBlock = new DynamicText(parser.readToEnd(), null);
+		this.repeatBlock = new TextCompilationUnit(parser.readToEnd());
 	}
 
 	////////////////////////

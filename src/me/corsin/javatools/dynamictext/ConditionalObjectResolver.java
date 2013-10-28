@@ -43,7 +43,7 @@ public class ConditionalObjectResolver implements ObjectResolver {
 		
 		parser.readIgnore();
 		parser.read(':');
-		this.subExpression = new DynamicText(parser.readToEnd(), null);
+		this.subExpression = new TextCompilationUnit(parser.readToEnd());
 	}
 
 	////////////////////////

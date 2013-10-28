@@ -9,25 +9,28 @@
 
 package me.corsin.javatools.dynamictext;
 
+import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-import me.corsin.javatools.string.TextParser;
+import me.corsin.javatools.io.IOUtils;
 
-public class DynamicText implements Expression {
+public class DynamicText {
 
 	////////////////////////
 	// VARIABLES
 	////////////////
 
-	private String text;
-	private List<Expression> expressions;
+	private TextCompilationUnit compilationUnit;
 	private Context context;
+	private String text;
 	
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
+	
+	public DynamicText(File file) throws IOException {
+		this(IOUtils.readFileAsString(file));
+	}
 	
 	public DynamicText() {
 		this("");
@@ -37,10 +40,17 @@ public class DynamicText implements Expression {
 		this(text, new Context());
 	}
 	
+	public DynamicText(Context context) {
+		this("", context);
+	}
+	
 	public DynamicText(String text, Context context) {
-		this.expressions = new ArrayList<Expression>();
+		this(new TextCompilationUnit(text), context);
+	}
+	
+	public DynamicText(TextCompilationUnit compiledText, Context context) {
 		this.context = context;
-		this.setText(text);
+		this.compilationUnit = compiledText;
 		
 		if (context != null) {
 			this.initializeBaseExpressions(context);
@@ -55,10 +65,6 @@ public class DynamicText implements Expression {
 		context.put("#if", new If());
 	}
 	
-	private void clear() {
-		this.expressions.clear();
-	}
-	
 	public void put(String key, Object value) {
 		this.context.put(key, value);
 	}
@@ -67,60 +73,14 @@ public class DynamicText implements Expression {
 		this.context.remove(key);
 	}
 	
-	private void parseString(String text) {
-		try {
-			this.clear();
-			
-			TextParser parser = new TextParser(text);
-			
-			while (!parser.isEmpty()) {
-				String textExpression = parser.readUpTo("{[");
-				
-				if (!textExpression.isEmpty()) {
-					this.expressions.add(new TextExpression(textExpression));
-				}
-				
-				if (!parser.isEmpty()) {
-					char c = parser.readChar();
-					
-					switch (c) {
-					case '{':
-						String evalExpression = parser.readScope('{', '}');
-						this.expressions.add(new EvaluatorExpression(evalExpression));
-						break;
-					case '[':
-						String repeatExpression = parser.readScope('[', ']');
-						this.expressions.add(new RepeaterExpression(repeatExpression));
-						break;
-					}	
-				}
-			}
-			
-			
-		} catch (IOException e) {
-			throw new InvalidTextException(e.getMessage(), e);
-		}
-	}
-	
 	public String toString() {
 		if (this.context == null) {
 			return "DynamicText:{No context set}";
 		}
 		
-		return this.renderForContext(this.context);
+		return this.compilationUnit.renderForContext(this.context);
 	}
 	
-	@Override
-	public String renderForContext(Context context) {
-		StringBuilder sb = new StringBuilder();
-		
-		for (Expression expression : this.expressions) {
-			sb.append(expression.renderForContext(context));
-		}
-		
-		return sb.toString();
-	}
-
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
@@ -134,14 +94,23 @@ public class DynamicText implements Expression {
 	}
 	
 	public String getText() {
-		return text;
+		return this.text;
 	}
 
 	public void setText(String text) {
 		if (text == null) {
 			text = "";
 		}
+
+		this.compilationUnit.compile(text);
 		this.text = text;
-		this.parseString(text);
+	}
+
+	public TextCompilationUnit getCompilationUnit() {
+		return compilationUnit;
+	}
+
+	public void setCompilationUnit(TextCompilationUnit compilationUnit) {
+		this.compilationUnit = compilationUnit;
 	}
 }

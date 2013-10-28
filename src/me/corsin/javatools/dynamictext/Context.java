@@ -41,10 +41,6 @@ public class Context {
 	}
 	
 	public Object get(String key) {
-//		if (!this.context.containsKey(key)) {
-//			throw new InvalidTextException("No such identifier " + key);
-//		}
-		
 		return this.context.get(key);
 	}
 
