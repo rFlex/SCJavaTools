@@ -35,7 +35,7 @@ public abstract class Pool<T> {
 
 	abstract protected T instantiate();
 	
-	public final T obtain() {
+	public T obtain() {
 		T obj = null;
 		
 		if (!this.objects.isEmpty()) {
@@ -52,7 +52,7 @@ public abstract class Pool<T> {
 		return obj;
 	}
 	
-	public final void release(T obj) {
+	public void release(T obj) {
 		if (this.getRetainedObjects() < this.maxObjects) {
 			if (obj instanceof Poolable) {
 				Poolable poolable = (Poolable)obj;
