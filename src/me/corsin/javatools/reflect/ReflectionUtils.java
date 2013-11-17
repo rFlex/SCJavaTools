@@ -9,6 +9,7 @@ package me.corsin.javatools.reflect;
 ////////
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,8 +31,35 @@ public class ReflectionUtils {
 	// METHODS
 	////////////////
 
+	public static Object newInstance(String className, Object ... parameters) {
+		try {
+			Class<?> objClass = Class.forName(className);
+			Constructor<?> constructor = getConstructor(objClass, parameters);
+			
+			if (constructor != null) {
+				return constructor.newInstance(parameters);
+			}
+		} catch (Exception e) {
+		}
+		
+		return null;
+	}
+	
 	public static boolean setField(Object object, Field field, Object value) {
 		return setField(object, field.getName(), value);
+	}
+	
+	public static boolean setPublicField(Object object, String fieldName, Object value) {
+		Class<?> objectClass = object.getClass();
+		Field field;
+		try {
+			field = objectClass.getField(fieldName);
+			field.set(object, value);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 	
 	/*
@@ -100,6 +128,33 @@ public class ReflectionUtils {
 		}
 	}
 	
+	public static Constructor<?> getConstructor(Class<?> cls, Object ... parameters) {
+		Constructor<?> constructor = null;
+		
+		for (Constructor<?> classMethod : cls.getConstructors()) {
+			Class<?>[] parametersType = classMethod.getParameterTypes();
+			boolean match = false;
+			
+			if (parametersType.length == parameters.length) {
+				match = true;
+				for (int i = 0, length = parametersType.length; i < length; i++) {
+					if (parameters[i] != null) {
+						if (!parametersType[i].isAssignableFrom(parameters[i].getClass())) {
+							match = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			if (match) {
+				constructor = classMethod;
+				break;
+			}
+		}
+		return constructor;
+	}
+	
 	public static Method getMethod(Class<?> cls, String methodName, Object ... parameters) {
 		Method method = null;
 		
@@ -113,8 +168,6 @@ public class ReflectionUtils {
 					for (int i = 0, length = parametersType.length; i < length; i++) {
 						if (parameters[i] != null) {
 							if (!parametersType[i].isAssignableFrom(parameters[i].getClass())) {
-								System.out.println("Not assignable: " + parametersType[i].getSimpleName());
-								System.out.println(parameters[i].getClass().getSimpleName());
 								match = false;
 								break;
 							}

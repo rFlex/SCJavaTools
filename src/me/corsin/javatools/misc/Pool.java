@@ -8,82 +8,74 @@ package me.corsin.javatools.misc;
 // File created on Oct 20, 2012 at 10:00:37 PM
 ////////
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 
-
-import java.util.ArrayList;
-
-public class Pool<T> {
+public abstract class Pool<T> {
 
 	////////////////////////
 	// VARIABLES
 	////////////////
 
-	private Class<?> _managedObjectClass;
-	private ArrayList<T> _objects;
-	private ObjectCreator<T> _creator;
-	
-	////////////////////////
-	// NESTED CLASSES
-	////////////////
-	
-	public static interface ObjectCreator<T> {
-		T instanciate();
-	}
-	
+	private Queue<T> objects;
+	private int maxObjects;
+
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
 
 	public Pool() {
-		this(null);
-	}
-	
-	public Pool(ObjectCreator<T> objectCreator) {
-		this._creator = objectCreator;
-		this._objects = new ArrayList<T>();
+		this.objects = new ArrayDeque<T>();
+		this.maxObjects = Integer.MAX_VALUE;
 	}
 	
 	////////////////////////
 	// METHODS
 	////////////////
 
+	abstract protected T instantiate();
+	
 	public final T obtain() {
 		T obj = null;
 		
-		if (!this._objects.isEmpty()) {
-			obj = this._objects.get(this._objects.size() - 1);
-			this._objects.remove(this._objects.size() - 1);
-		} else if (this._creator != null) {
-			obj = this._creator.instanciate();
+		if (!this.objects.isEmpty()) {
+			obj = this.objects.poll();
+		} else {
+			obj = this.instantiate();
+		}
+		
+		if (obj instanceof Poolable) {
+			Poolable poolable = (Poolable)obj;
+			poolable.setPool(this);
 		}
 		
 		return obj;
 	}
 	
 	public final void release(T obj) {
-		this._objects.add(obj);
+		if (this.getRetainedObjects() < this.maxObjects) {
+			if (obj instanceof Poolable) {
+				Poolable poolable = (Poolable)obj;
+				poolable.reset();
+			}
+			
+			this.objects.add(obj);
+		}
 	}
 	
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
-	
-	public final void setCreator(ObjectCreator<T> objectCreator) {
-		this._creator = objectCreator;
-	}
-	
-	protected final void setManagedObjectClass(Class<?> managedObject) {
-		this._managedObjectClass = managedObject;
-	}
-	
-	public final Class<?> getManagedObjectClass() {
-		return this._managedObjectClass;
-	}
-	
-	public final int getRetainedObjectsSize() {
-		return this._objects.size();
-	}
-	
-	
 
+	public final int getRetainedObjects() {
+		return this.objects.size();
+	}
+
+	public final int getMaxObjects() {
+		return maxObjects;
+	}
+
+	public final void setMaxObjects(int maxObjects) {
+		this.maxObjects = maxObjects;
+	}
 }

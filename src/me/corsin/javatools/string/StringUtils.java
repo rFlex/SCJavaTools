@@ -117,6 +117,13 @@ public class StringUtils {
 		}
 		
 	}
+	
+	public static boolean isNullOrEmpty(String str) {
+		if (str == null) {
+			return true;
+		}
+		return str.trim().length() == 0;
+	}
 
 	////////////////////////
 	// GETTERS/SETTERS
