@@ -9,7 +9,7 @@ package me.corsin.javatools.misc;
 ////////
 
 import java.util.ArrayDeque;
-import java.util.Queue;
+import java.util.Deque;
 
 public abstract class Pool<T> {
 
@@ -17,7 +17,7 @@ public abstract class Pool<T> {
 	// VARIABLES
 	////////////////
 
-	private Queue<T> objects;
+	private Deque<T> objects;
 	private int maxObjects;
 
 	////////////////////////
@@ -37,16 +37,22 @@ public abstract class Pool<T> {
 	
 	public T obtain() {
 		T obj = null;
-		
+
+		boolean wasInstanciated = false;
 		if (!this.objects.isEmpty()) {
 			obj = this.objects.poll();
 		} else {
 			obj = this.instantiate();
+			wasInstanciated = true;
 		}
 		
 		if (obj instanceof Poolable) {
 			Poolable poolable = (Poolable)obj;
 			poolable.setPool(this);
+			
+			if (wasInstanciated) {
+				poolable.reset();
+			}
 		}
 		
 		return obj;

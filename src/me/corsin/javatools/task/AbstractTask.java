@@ -54,10 +54,10 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 			
 			this.handle();
 			
-			this.completed = true;
 		} catch (Throwable e) {
 			this.thrownException = e;
 		}
+		this.completed = true;
 		this.callListener();
 		this.started = false;
 	}
