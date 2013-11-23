@@ -69,6 +69,24 @@ public abstract class Pool<T> {
 		}
 	}
 	
+	/**
+	 * Instantiate quantity numbers of elements from the Pool
+	 * and set them in the pool right away
+	 * @param quantity
+	 */
+	@SuppressWarnings("unchecked")
+	public void preload(int quantity) {
+		Object[] objects = new Object[quantity];
+		
+		for (int i = 0; i < quantity; i++) {
+			objects[i] = this.instantiate();
+		}
+		
+		for (int i = 0; i < quantity; i++) {
+			this.release((T)objects[i]);
+		}
+	}
+	
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
