@@ -38,8 +38,9 @@ public class StringUtils {
 
         Random random = new Random(new Date().getTime());
 
+        final int allowedCharsLength = allowedChars.length();
         for (int i = 0; i < size; i++) {
-            randomStr[i] = allowedChars.charAt(random.nextInt(allowedChars.length()));
+            randomStr[i] = allowedChars.charAt(random.nextInt(allowedCharsLength));
         }
 
         return new String(randomStr);

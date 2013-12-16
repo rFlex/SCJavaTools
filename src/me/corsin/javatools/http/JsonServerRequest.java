@@ -23,6 +23,9 @@ public class JsonServerRequest extends ServerRequest {
 	// VARIABLES
 	////////////////
 
+	public static final String ResponseTransformerSharedPropertiesKey = "JsonResponseTransformer";
+	public static final String ResponseTransformerClassSharedPropertiesKey = "JsonResponseTransformerClass";
+
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
@@ -42,7 +45,7 @@ public class JsonServerRequest extends ServerRequest {
 	public JsonServerRequest(Class<?> expectedResponseNodeType, String url, HttpMethod requestType) {
 		super(expectedResponseNodeType, url, requestType);
 		
-		this.configureResponseTransformerUsingSharedProperties("JsonResponseTransformer");
+		this.configureResponseTransformerUsingSharedProperties(ResponseTransformerSharedPropertiesKey, ResponseTransformerClassSharedPropertiesKey);
 	}
 
 	////////////////////////

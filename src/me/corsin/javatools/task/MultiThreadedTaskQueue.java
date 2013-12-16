@@ -15,7 +15,7 @@ public class MultiThreadedTaskQueue extends TaskQueue implements Runnable {
 	// VARIABLES
 	////////////////
 	
-	private Thread[] threads;
+	private TaskQueueThread[] threads;
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -26,10 +26,10 @@ public class MultiThreadedTaskQueue extends TaskQueue implements Runnable {
 	}
 	
 	public MultiThreadedTaskQueue(int threadCount) {
-		this.threads = new Thread[threadCount];
+		this.threads = new TaskQueueThread[threadCount];
 		
 		for (int i = 0, length = threads.length; i < length; i++) {
-			this.threads[i] = new Thread(this, "TaskQueueThread #" + i);
+			this.threads[i] = new TaskQueueThread(this, this, "TaskQueueThread #" + i);
 			this.threads[i].start();
 		}
 	}

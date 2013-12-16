@@ -22,6 +22,9 @@ public class XMLServerRequest extends ServerRequest {
 	////////////////////////
 	// VARIABLES
 	////////////////
+	
+	public static final String ResponseTransformerSharedPropertiesKey = "XMLResponseTransformer";
+	public static final String ResponseTransformerClassSharedPropertiesKey = "XMLResponseTransformerClass";
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -42,7 +45,7 @@ public class XMLServerRequest extends ServerRequest {
 	public XMLServerRequest(Class<?> expectedResponseNodeType, String url, HttpMethod requestType) {
 		super(expectedResponseNodeType, url, requestType);
 		
-		this.configureResponseTransformerUsingSharedProperties("XMLResponseTransformer");
+		this.configureResponseTransformerUsingSharedProperties(ResponseTransformerSharedPropertiesKey, ResponseTransformerClassSharedPropertiesKey);
 	}
 
 	////////////////////////

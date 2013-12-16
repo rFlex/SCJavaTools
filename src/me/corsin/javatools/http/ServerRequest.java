@@ -289,11 +289,11 @@ public class ServerRequest {
 		return (T)communicator.getResponse(this);
 	}
 	
-	protected void configureResponseTransformerUsingSharedProperties(String sharedPropertyName) {
+	protected void configureResponseTransformerUsingSharedProperties(String sharedPropertyName, String sharedPropertyNameClass) {
 		Object responseTransformer = SharedProperties.getSharedInstance().get(sharedPropertyName);
 		
 		if (responseTransformer == null) {
-			String jsonResponseTransformer = (String)SharedProperties.getSharedInstance().get(sharedPropertyName + "Class");
+			String jsonResponseTransformer = (String)SharedProperties.getSharedInstance().get(sharedPropertyNameClass);
 			
 			if (jsonResponseTransformer != null) {
 				try {

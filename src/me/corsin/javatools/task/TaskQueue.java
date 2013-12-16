@@ -21,6 +21,7 @@ public class TaskQueue implements Closeable {
 	// VARIABLES
 	////////////////
 	
+	private static TaskQueue mainTaskQueue;
 	// This variable is notified each time a Runnable is added or when it is empty
 	final private Queue<Runnable> tasks;
 	// This variable is notified when it reaches zero
@@ -98,12 +99,13 @@ public class TaskQueue implements Closeable {
 		}
 	}
 	
-	public void executeAsync(Runnable runable) {
+	public <T extends Runnable> T executeAsync(T runnable) {
 		synchronized (this.tasks) {
-			this.tasks.add(runable);
+			this.tasks.add(runnable);
 			// Notify that a task has been added
 			this.tasks.notifyAll();
 		}
+		return runnable;
 	}
 	
 	public void executeSync(Runnable runnable) {
@@ -173,6 +175,18 @@ public class TaskQueue implements Closeable {
 			}
 		}
 	}
+	
+	public static TaskQueue currentTaskQueue() {
+		Thread currentThread = Thread.currentThread();
+		TaskQueue taskQueue = mainTaskQueue;
+		
+		if (currentThread instanceof TaskQueueThread) {
+			TaskQueueThread taskQueueThread = (TaskQueueThread)currentThread;
+			taskQueue = taskQueueThread.getTaskQueue();
+		}
+		
+		return taskQueue;
+	}
 
 	////////////////////////
 	// GETTERS/SETTERS
@@ -188,5 +202,13 @@ public class TaskQueue implements Closeable {
 	
 	public boolean isClosed() {
 		return this.closed;
+	}
+
+	public static void setMainTaskQueue(TaskQueue taskQueue) {
+		mainTaskQueue = taskQueue;
+	}
+	
+	public static TaskQueue getMainTaskQueue() {
+		return mainTaskQueue;
 	}
 }
