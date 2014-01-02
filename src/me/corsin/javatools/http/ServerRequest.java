@@ -18,6 +18,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -161,6 +162,20 @@ public class ServerRequest {
 	 */
 	public ServerRequest addParameter(String name, Object value, String fileName) {
 		return this.addParameter(new Parameter(name, value, fileName));
+	}
+	
+	public ServerRequest removeParameter(String name) {
+		Iterator<Parameter> it = this.parameters.iterator();
+		
+		while (it.hasNext()) {
+			Parameter param = it.next();
+			
+			if (param.getName().equals(name)) {
+				it.remove();
+			}
+		}
+		
+		return this;
 	}
 	
 	public ServerRequest addParameter(Parameter parameter) {

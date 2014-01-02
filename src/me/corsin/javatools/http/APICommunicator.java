@@ -9,6 +9,7 @@
 
 package me.corsin.javatools.http;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -82,7 +83,13 @@ public class APICommunicator {
 				connection.getOutputStream().close();
 			}
 			
-			InputStream toReceive = connection.getInputStream();
+			InputStream toReceive = null;
+			
+			try {
+				toReceive = connection.getInputStream();
+			} catch (IOException e) {
+				toReceive = connection.getErrorStream();
+			}
 			
 			if (this.getResponseTransformer() != null) {
 				response = this.getResponseTransformer().transformResponse(toReceive, expectedResponseType);

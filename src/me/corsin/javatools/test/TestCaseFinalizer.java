@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////
 // Project : SCJavaTools
 // Package : me.corsin.javatools.test
-// TestCase.java
+// TestCaseFinalizer.java
 //
 // Author : Simon CORSIN <simoncorsin@gmail.com>
-// File created on Oct 17, 2013 at 8:23:31 PM
+// File created on Dec 27, 2013 at 10:05:41 AM
 ////////
 
 package me.corsin.javatools.test;
@@ -16,8 +16,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface TestCase {
-	
-	boolean stopIfFailed() default false;
-	
+public @interface TestCaseFinalizer {
+
 }

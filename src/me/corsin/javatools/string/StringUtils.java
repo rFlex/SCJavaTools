@@ -102,6 +102,32 @@ public class StringUtils {
 		return false;
 	}
 	
+	public static String replacePathExtension(String fileName, String newPathExtension) {
+		String output = fileName;
+
+		int i = fileName.lastIndexOf('.');
+		int p = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
+
+		if (i > p) {
+		    output = fileName.substring(0, i + 1) + newPathExtension;
+		}
+		
+		return output;
+	}
+	
+	public static String getPathExtension(String fileName) {
+		String extension = "";
+
+		int i = fileName.lastIndexOf('.');
+		int p = Math.max(fileName.lastIndexOf('/'), fileName.lastIndexOf('\\'));
+
+		if (i > p) {
+		    extension = fileName.substring(i+1);
+		}
+		
+		return extension;
+	}
+	
 	public static String cleanString(String str) {
 		Charset charset = Charset.forName("UTF-8");
 		CharsetDecoder utf8Decoder = charset.newDecoder();

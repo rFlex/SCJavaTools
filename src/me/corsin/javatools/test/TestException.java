@@ -20,7 +20,6 @@ public class TestException extends RuntimeException {
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-	
 
 	public TestException(String message) {
 		super(message);
