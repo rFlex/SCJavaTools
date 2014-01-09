@@ -9,8 +9,11 @@
 
 package me.corsin.javatools.date;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class DateUtils {
 
@@ -25,6 +28,22 @@ public class DateUtils {
 	////////////////////////
 	// METHODS
 	////////////////
+	
+	public static Date currentTimeGMT() {
+		SimpleDateFormat dateFormatGmt = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+		dateFormatGmt.setTimeZone(TimeZone.getTimeZone("GMT"));
+
+		//Local time zone   
+		SimpleDateFormat dateFormatLocal = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+
+		//Time in GMT
+		try {
+			return dateFormatLocal.parse(dateFormatGmt.format(new Date()));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	public static Date getDateOffsetedFromNow(int calendarField, int amount) {
 		return getDateOffseted(new Date(), calendarField, amount);
