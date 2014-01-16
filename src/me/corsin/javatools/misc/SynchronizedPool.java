@@ -14,23 +14,31 @@ public abstract class SynchronizedPool<T> extends Pool<T> {
 	////////////////////////
 	// VARIABLES
 	////////////////
+	
+	private Object lockObject;
 
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
+	
+	public SynchronizedPool() {
+		super();
+		
+		this.lockObject = new Object();
+	}
 
 	////////////////////////
 	// METHODS
 	////////////////
 	
 	public T obtain() {
-		synchronized (this) {
+		synchronized (this.lockObject) {
 			return super.obtain();
 		}
 	}
 	
 	public void release(T obj) {
-		synchronized (this) {
+		synchronized (this.lockObject) {
 			super.release(obj);
 		}
 	}
