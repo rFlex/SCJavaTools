@@ -35,8 +35,6 @@ public class PoolableImpl implements Poolable {
 		if (this.pool != null) {
 			this.pool.release(this);
 			this.pool = null;
-		} else {
-			throw new RuntimeException("Too many releases on " + this.getClass().getSimpleName());
 		}
 	}
 
