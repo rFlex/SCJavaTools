@@ -8,8 +8,6 @@ package me.corsin.javatools.timer;
 // File created on Oct 7, 2012 at 5:25:46 PM
 ////////
 
-
-
 public class TimeDiff {
 
 	////////////////////////
@@ -17,13 +15,13 @@ public class TimeDiff {
 	////////////////
 	
 	public final static float DAY = TimeDiff.HOUR * 24;
-	public final static float HOUR = TimeDiff.MINUT * 60;
-	public final static float MINUT = 60;
+	public final static float HOUR = TimeDiff.MINUTE * 60;
+	public final static float MINUTE = TimeDiff.SECOND * 60;
 	public final static float SECOND = 1;
 	public float totalSeconds;
 	public int days;
 	public int hours;
-	public int minuts;
+	public int minutes;
 	public int seconds;
 	public int milliseconds;
 
@@ -46,7 +44,7 @@ public class TimeDiff {
 	public void reset() {
 		this.totalSeconds = 0;
 		this.hours = 0;
-		this.minuts = 0;
+		this.minutes = 0;
 		this.seconds = 0;
 		this.milliseconds = 0;
 	}
@@ -56,20 +54,17 @@ public class TimeDiff {
 		
 		this.totalSeconds = timeDiff;
 		
-		while (timeDiff >= TimeDiff.DAY) {
-			this.days++;
-			timeDiff -= TimeDiff.DAY;
-		}
-		while (timeDiff >= TimeDiff.HOUR) {
-			this.hours++;
-			timeDiff -= TimeDiff.HOUR;
-		}
-		while (timeDiff >= TimeDiff.MINUT) {
-			this.minuts++;
-			timeDiff -= TimeDiff.MINUT;
-		}
+		this.days = (int)(timeDiff / TimeDiff.DAY);
+		timeDiff -= this.days * TimeDiff.DAY;
+		
+		this.hours = (int)(timeDiff / TimeDiff.HOUR);
+		timeDiff -= this.hours * TimeDiff.HOUR;
+		
+		this.minutes = (int)(timeDiff / TimeDiff.MINUTE);
+		timeDiff -= this.minutes * TimeDiff.MINUTE;
+		
 		this.seconds = (int)timeDiff;
-		this.milliseconds = (int)(timeDiff * 1000f) - this.seconds;;
+		this.milliseconds = (int)(timeDiff * 1000f) - (this.seconds * 1000);
 	}
 	
 	////////////////////////

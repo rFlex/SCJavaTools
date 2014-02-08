@@ -64,8 +64,8 @@ public class StopWatch {
 		if (timeDiff.hours > 0) {
 			date += timeDiff.hours + " hours ";
 		}
-		if (timeDiff.minuts > 0) {
-			date += timeDiff.minuts + " minuts ";
+		if (timeDiff.minutes > 0) {
+			date += timeDiff.minutes + " minutes ";
 		}
 		if (timeDiff.seconds > 0) {
 			date += timeDiff.seconds + " seconds ";
