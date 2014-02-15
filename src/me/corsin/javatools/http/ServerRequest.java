@@ -56,6 +56,7 @@ public class ServerRequest {
 	private IResponseTransformer responseTransformer;
 	private TaskQueue taskQueue;
 	private boolean hasRawData;
+	private boolean forceMultipart;
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -97,18 +98,19 @@ public class ServerRequest {
 	
 	@Override
 	public String toString() {
-		String finalUrl = url;
+		StringBuilder finalUrl = new StringBuilder();
+		finalUrl.append(this.url);
 
 		if (!this.parameters.isEmpty()) {
-			finalUrl += "?";
+			finalUrl.append('?');
 			
 			boolean first = true;
 			for (Parameter parameter : this.parameters) {
 				if (!first) {
-					finalUrl += "&";
+					finalUrl.append('&');
 				}
 				try {
-					finalUrl += parameter.getName() + "="  + URLEncoder.encode(parameter.getValue().toString(), "UTF-8");
+					finalUrl.append(parameter.getName() + "="  + URLEncoder.encode(parameter.getValue().toString(), "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
@@ -116,7 +118,7 @@ public class ServerRequest {
 			}
 		}
 
-		return finalUrl;
+		return finalUrl.toString();
 	}
 	
 	public String parametersToString() {
@@ -140,6 +142,23 @@ public class ServerRequest {
 		}
 
 		return parametersString.toString();
+	}
+	
+	public ServerRequest addParameter(String name, Object[] params) {
+		for (Object param : params) {
+			this.addParameter(name, param);
+		}
+		return this;
+	}
+
+	/**
+	 * Add a generic parameter. ToString is called on the value
+	 * @param name
+	 * @param value
+	 * @return
+	 */
+	public ServerRequest addParameter(String name, Object value) {
+		return this.addParameter(name, value.toString());
 	}
 	
 	public ServerRequest addParameter(String name, Number number) {
@@ -193,8 +212,8 @@ public class ServerRequest {
 		case PUT:
 			this.generatedURL = new URL(this.getURL());
 			
-			if (this.hasRawData) {
-				if (this.parameters.size() > 1) {
+			if (this.hasRawData || this.forceMultipart) {
+				if (this.parameters.size() > 1 || this.forceMultipart) {
 					HttpMultipartGenerator multipartGenerator = new HttpMultipartGenerator("UTF-8");
 					this.contentType = multipartGenerator.getContentType();
 					
@@ -294,7 +313,7 @@ public class ServerRequest {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T getResponse(Class<T> responseNodeType) throws Throwable {
+	public <T> T getResponse(Class<T> responseNodeType) throws Exception {
 		this.setExpectedResponseType(responseNodeType);
 		
 		APICommunicator communicator = new APICommunicator();
@@ -405,5 +424,13 @@ public class ServerRequest {
 
 	public void setTaskQueue(TaskQueue taskQueue) {
 		this.taskQueue = taskQueue;
+	}
+
+	public boolean isForceMultipart() {
+		return forceMultipart;
+	}
+
+	public void setForceMultipart(boolean forceMultipart) {
+		this.forceMultipart = forceMultipart;
 	}
 }

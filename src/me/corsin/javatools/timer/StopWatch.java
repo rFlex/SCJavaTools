@@ -55,32 +55,37 @@ public class StopWatch {
 	}
 	
 	public String stringCurrent() {
-		TimeDiff timeDiff = this.timeDiffCurrent();
-		String date = "";
+		TimeSpan timeDiff = this.timeSpanCurrent();
+		StringBuilder date = new StringBuilder();
 
-		if (timeDiff.days > 0) {
-			date += timeDiff.days + " days ";
+		if (timeDiff.getDays() > 0) {
+			date.append(timeDiff.getDays());
+			date.append(" days ");
 		}
-		if (timeDiff.hours > 0) {
-			date += timeDiff.hours + " hours ";
+		if (timeDiff.getHours() > 0) {
+			date.append(timeDiff.getHours());
+			date.append(" hours ");
 		}
-		if (timeDiff.minutes > 0) {
-			date += timeDiff.minutes + " minutes ";
+		if (timeDiff.getMinutes() > 0) {
+			date.append(timeDiff.getMinutes());
+			date.append(" minutes ");
 		}
-		if (timeDiff.seconds > 0) {
-			date += timeDiff.seconds + " seconds ";
+		if (timeDiff.getSeconds() > 0) {
+			date.append(timeDiff.getSeconds());
+			date.append(" seconds ");
 		}
-		date += timeDiff.milliseconds + " milliseconds";
+		date.append(timeDiff.getMilliseconds());
+		date.append(" milliseconds");
 		
-		return date;
+		return date.toString();
 	}
 	
-	public TimeDiff timeDiffCurrent() {
-		return new TimeDiff(this.secondCurrent());
+	public TimeSpan timeSpanCurrent() {
+		return new TimeSpan(this.secondCurrent());
 	}
 	
-	public TimeDiff timeDiffCurrent(TimeDiff diff) {
-		diff.create(this.secondCurrent());
+	public TimeSpan timeSpanCurrent(TimeSpan diff) {
+		diff.setTotalSeconds(this.secondCurrent());
 		return diff;
 	}
 	

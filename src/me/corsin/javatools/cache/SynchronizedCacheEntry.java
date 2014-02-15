@@ -9,6 +9,8 @@
 
 package me.corsin.javatools.cache;
 
+import me.corsin.javatools.timer.TimeSpan;
+
 public class SynchronizedCacheEntry<T> extends CacheEntry<T> {
 
 	////////////////////////
@@ -21,6 +23,10 @@ public class SynchronizedCacheEntry<T> extends CacheEntry<T> {
 	// CONSTRUCTORS
 	////////////////
 
+	public SynchronizedCacheEntry(TimeSpan timeSpan, CacheEntryRefresher<T> refresher) {
+		this((int)timeSpan.getTotalSeconds(), refresher);
+	}
+	
 	public SynchronizedCacheEntry(int refreshIntervalSeconds, CacheEntryRefresher<T> refresher) {
 		super(refreshIntervalSeconds, refresher);
 
@@ -39,9 +45,9 @@ public class SynchronizedCacheEntry<T> extends CacheEntry<T> {
 	// GETTERS/SETTERS
 	////////////////
 	
-	public T getUpToDateObject() throws Exception {
+	public T getUpToDateObject(CacheEntryRefresher<T> refresher) throws Exception {
 		synchronized (this.lock) {
-			return super.getUpToDateObject();
+			return super.getUpToDateObject(refresher);
 		}
 	}
 

@@ -13,6 +13,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import me.corsin.javatools.date.DateUtils;
+import me.corsin.javatools.timer.TimeSpan;
 
 public class CacheEntry<T> {
 
@@ -30,6 +31,10 @@ public class CacheEntry<T> {
 	// CONSTRUCTORS
 	////////////////
 
+	public CacheEntry(TimeSpan timeSpan, CacheEntryRefresher<T> refresher) {
+		this((int)timeSpan.getTotalSeconds(), refresher);
+	}
+	
 	public CacheEntry(int refreshIntervalSeconds, CacheEntryRefresher<T> refresher) {
 		this.refreshIntervalSeconds = refreshIntervalSeconds;
 		this.refresher = refresher;
@@ -47,7 +52,7 @@ public class CacheEntry<T> {
 	// GETTERS/SETTERS
 	////////////////
 	
-	public T getUpToDateObject() throws Exception {
+	public T getUpToDateObject(CacheEntryRefresher<T> refresher) throws Exception {
 		boolean shouldRefresh = false;
 		
 		Date currentTime = DateUtils.currentTimeGMT();
@@ -56,14 +61,18 @@ public class CacheEntry<T> {
 		}
 		
 		if (shouldRefresh) {
-			if (this.refresher != null) {
-				this.object = this.refresher.refreshData();
+			if (refresher != null) {
+				this.object = refresher.refreshData();
 				this.lastRefreshedDate = currentTime;
 				this.nextRefreshDate = DateUtils.getDateOffseted(this.lastRefreshedDate, Calendar.SECOND, this.refreshIntervalSeconds);
 			}
 		}
 		
 		return this.object;
+	}
+	
+	public T getUpToDateObject() throws Exception {
+		return this.getUpToDateObject(this.refresher);
 	}
 	
 	public T getObject() {
