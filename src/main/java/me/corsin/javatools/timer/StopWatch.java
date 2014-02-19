@@ -55,29 +55,7 @@ public class StopWatch {
 	}
 	
 	public String stringCurrent() {
-		TimeSpan timeDiff = this.timeSpanCurrent();
-		StringBuilder date = new StringBuilder();
-
-		if (timeDiff.getDays() > 0) {
-			date.append(timeDiff.getDays());
-			date.append(" days ");
-		}
-		if (timeDiff.getHours() > 0) {
-			date.append(timeDiff.getHours());
-			date.append(" hours ");
-		}
-		if (timeDiff.getMinutes() > 0) {
-			date.append(timeDiff.getMinutes());
-			date.append(" minutes ");
-		}
-		if (timeDiff.getSeconds() > 0) {
-			date.append(timeDiff.getSeconds());
-			date.append(" seconds ");
-		}
-		date.append(timeDiff.getMilliseconds());
-		date.append(" milliseconds");
-		
-		return date.toString();
+		return this.timeSpanCurrent().toString();
 	}
 	
 	public TimeSpan timeSpanCurrent() {

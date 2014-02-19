@@ -51,6 +51,32 @@ public class TimeSpan {
 	// METHODS
 	////////////////
 	
+	@Override
+	public String toString() {
+		StringBuilder date = new StringBuilder();
+
+		if (this.days > 0) {
+			date.append(this.days);
+			date.append(" days ");
+		}
+		if (this.hours > 0) {
+			date.append(this.hours);
+			date.append(" hours ");
+		}
+		if (this.minutes > 0) {
+			date.append(this.minutes);
+			date.append(" minutes ");
+		}
+		if (this.seconds > 0) {
+			date.append(this.seconds);
+			date.append(" seconds ");
+		}
+		date.append(this.milliseconds);
+		date.append(" milliseconds");
+		
+		return date.toString();
+	}
+	
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
