@@ -58,9 +58,9 @@ Special inputs:
 
 * #repeaterInputName : When using the repeater ([collection->repeaterInputName:text]), you can access the collection in an expression if you add a '#' in front of the given inputName.
 * #repeaterInputNameNumber : When using the repeater, you can access the Integer that contains the current iteration number by adding a '#' in front of the given inputName and adding 'Number' at the end of the inputName.
-* #if : Access the special object that contains some conditions. Check what you can use on this object here: https://github.com/rFlex/SCJavaTools/blob/master/src/me/corsin/javatools/dynamictext/If.java
+* #if : Access the special object that contains some conditions. Check what you can use on this object here: https://github.com/rFlex/SCJavaTools/blob/master/src/main/java/me/corsin/javatools/dynamictext/If.java
 
-Check the examples on https://github.com/rFlex/SCJavaTools/blob/master/src/me/corsin/javatools/dynamictext/Tests.java
+Check the examples on https://github.com/rFlex/SCJavaTools/blob/master/src/main/java/me/corsin/javatools/dynamictext/Tests.java
 
 
 TaskQueue
