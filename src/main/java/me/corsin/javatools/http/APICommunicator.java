@@ -48,7 +48,7 @@ public class APICommunicator {
 	// METHODS
 	////////////////
 	
-	public Object getResponse(ServerRequest request) throws Exception {
+	public Object getResponse(ServerRequest request) throws IOException {
 		request.generate();
 		
 		return this.getResponse(request.getGeneratedURL(), request.getHttpMethod().toString(), request.getHeaders(), request.getBody(), request.getExpectedResponseType());

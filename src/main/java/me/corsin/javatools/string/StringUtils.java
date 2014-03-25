@@ -151,6 +151,20 @@ public class StringUtils {
 		}
 		return str.trim().length() == 0;
 	}
+	
+	public static boolean equals(String str, String str2) {
+		if (str == null && str2 == null) {
+			return true;
+		}
+		if (str == null) {
+			return false;
+		}
+		if (str2 == null) {
+			return false;
+		}
+		
+		return str.equals(str2);
+	}
 
 	////////////////////////
 	// GETTERS/SETTERS

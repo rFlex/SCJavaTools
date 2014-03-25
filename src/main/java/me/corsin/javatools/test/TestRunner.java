@@ -62,7 +62,12 @@ public class TestRunner {
 		});
 		
 		for (Pair<Method, TestCase> method : methods) {
-			System.out.print("\tTesting " + method.getFirst().getName() + ": ");
+			String methodName = method.getFirst().getName();
+			while (methodName.startsWith("_")) {
+				methodName = methodName.substring(1);
+			}
+			
+			System.out.print("\tTesting " + methodName + ": ");
 			System.out.flush();
 			
 			Throwable e = this.runTest(method.getFirst(), instanceToTry);

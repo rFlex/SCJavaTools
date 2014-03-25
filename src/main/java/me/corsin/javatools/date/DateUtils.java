@@ -9,6 +9,7 @@
 
 package me.corsin.javatools.date;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -45,6 +46,16 @@ public class DateUtils {
 		}
 	}
 	
+	public static String toISO8601String(Date date) {
+		TimeZone tz = TimeZone.getTimeZone("UTC");
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'Z'");
+//		DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+		df.setTimeZone(tz);
+		String value = df.format(date);
+		
+		return value;
+	}
+	
 	public static Date getDateOffsetedFromNow(int calendarField, int amount) {
 		return getDateOffseted(new Date(), calendarField, amount);
 	}
@@ -54,6 +65,19 @@ public class DateUtils {
 		calendar.setTime(date);
 		calendar.add(calendarField, amount);
 
+		return calendar.getTime();
+	}
+	
+	public static long getTimeMillis(int year, int month, int day) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(year, month - 1, day, 0, 0, 0);
+//		System.out.println();
+		return calendar.getTimeInMillis();
+	}
+	
+	public static Date getDate(int year, int month, int day) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(year, month - 1, day, 0, 0, 0);
 		return calendar.getTime();
 	}
 

@@ -5,6 +5,7 @@
   <version>1.0</version>
   <name>SCJavaTools</name>
   <description>Tools that heal the pain from your ass!</description>
+  
   <build>
     <plugins>
       <plugin>

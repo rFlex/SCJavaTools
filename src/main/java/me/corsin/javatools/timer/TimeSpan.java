@@ -89,6 +89,10 @@ public class TimeSpan {
 		
 		return totalSeconds;
 	}
+	
+	public long getTotalMs() {
+		return (long)(this.getTotalSeconds() * 1000f);
+	}
 
 	public TimeSpan setTotalSeconds(float totalSeconds) {
 		this.totalSeconds = totalSeconds;

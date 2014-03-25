@@ -17,11 +17,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import me.corsin.javatools.date.DateUtils;
 import me.corsin.javatools.http.APICommunicator.IResponseTransformer;
 import me.corsin.javatools.properties.InvalidConfigurationException;
 import me.corsin.javatools.properties.SharedProperties;
@@ -146,7 +148,11 @@ public class ServerRequest {
 	
 	public ServerRequest addParameter(String name, Object[] params) {
 		for (Object param : params) {
-			this.addParameter(name, param);
+			if (param instanceof Date) {
+				this.addParameter(name, (Date)param);
+			} else {
+				this.addParameter(name, param);
+			}
 		}
 		return this;
 	}
@@ -159,6 +165,12 @@ public class ServerRequest {
 	 */
 	public ServerRequest addParameter(String name, Object value) {
 		return this.addParameter(name, value.toString());
+	}
+	
+	public ServerRequest addParameter(String name, Date date) {
+		this.addParameter(name, DateUtils.toISO8601String(date));
+		
+		return this;
 	}
 	
 	public ServerRequest addParameter(String name, Number number) {
@@ -313,7 +325,7 @@ public class ServerRequest {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public <T> T getResponse(Class<T> responseNodeType) throws Exception {
+	public <T> T getResponse(Class<T> responseNodeType) throws IOException {
 		this.setExpectedResponseType(responseNodeType);
 		
 		APICommunicator communicator = new APICommunicator();
@@ -339,8 +351,8 @@ public class ServerRequest {
 		}
 		
 		if (responseTransformer == null) {
-			throw new InvalidConfigurationException("Youu need to have the \"" + sharedPropertyName + "\" or the " +
-					"\"" + sharedPropertyName + "Class\" property set in the SharedProperties instance");
+//			throw new InvalidConfigurationException("You need to have the \"" + sharedPropertyName + "\" or the " +
+//					"\"" + sharedPropertyName + "Class\" property set in the SharedProperties instance");
 		}
 		
 		try {
