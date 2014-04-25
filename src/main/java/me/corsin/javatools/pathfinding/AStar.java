@@ -7,8 +7,6 @@ package me.corsin.javatools.pathfinding;
 ////////
 
 
-
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -42,6 +40,7 @@ public class AStar<T> {
 			public int compare(ANode<T> o1, ANode<T> o2) {
 				return o1.getFScore() - o2.getFScore();
 			}
+
 		});
 		
 		this.openList = new HashMap<T, ANode<T>>();

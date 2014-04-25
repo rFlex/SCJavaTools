@@ -108,7 +108,7 @@ public class TaskQueue implements Closeable {
 		return runnable;
 	}
 	
-	public void executeSync(Runnable runnable) {
+	public <T extends Runnable> T executeSync(T runnable) {
 		synchronized (runnable) {
 			this.executeAsync(runnable);
 			try {
@@ -117,18 +117,22 @@ public class TaskQueue implements Closeable {
 				e.printStackTrace();
 			}
 		}
+		
+		return runnable;
 	}
 	
-	public void executeSyncTimed(Runnable runnable, long inMs) {
+	public <T extends Runnable> T executeSyncTimed(T runnable, long inMs) {
 		try {
 			Thread.sleep(inMs);
 			this.executeSync(runnable);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+		
+		return runnable;
 	}
 	
-	public void executeAsyncTimed(Runnable runnable, long inMs) {
+	public <T extends Runnable> T executeAsyncTimed(T runnable, long inMs) {
 		final Runnable theRunnable = runnable;
 		
 		// This implementation is not really suitable for now as the timer uses its own thread
@@ -141,6 +145,8 @@ public class TaskQueue implements Closeable {
 				executeAsync(theRunnable);
 			}
 		}, inMs);
+		
+		return runnable;
 	}
 	
 	protected void waitForTasks() {

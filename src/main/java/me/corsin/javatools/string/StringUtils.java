@@ -32,18 +32,27 @@ public class StringUtils {
 	// METHODS
 	////////////////
 	
+	public static String randomStringInRange(String allowedChars, int size) {
+		char[] randomStr = new char[size];
+		
+		Random random = new Random(new Date().getTime());
+		
+		final int allowedCharsLength = allowedChars.length();
+		for (int i = 0; i < size; i++) {
+			randomStr[i] = allowedChars.charAt(random.nextInt(allowedCharsLength));
+		}
+		
+		return new String(randomStr);
+	}
+	
     private static final String allowedChars = "azertyuiopqsdfghjklmwxcvbnAZERTYUIOPQSDFGHJKLMWXCVBN0123456789";
     public static String randomAlphaNumericString(int size) {
-        char[] randomStr = new char[size];
-
-        Random random = new Random(new Date().getTime());
-
-        final int allowedCharsLength = allowedChars.length();
-        for (int i = 0; i < size; i++) {
-            randomStr[i] = allowedChars.charAt(random.nextInt(allowedCharsLength));
-        }
-
-        return new String(randomStr);
+    	return randomStringInRange(allowedChars, size);
+    }
+    
+    private static final String allowedNumericChars = "0123456789";
+    public static String randomNumericString(int size) {
+    	return randomStringInRange(allowedNumericChars, size);
     }
     
 	public static String randomString(int minSize, int maxSize) {

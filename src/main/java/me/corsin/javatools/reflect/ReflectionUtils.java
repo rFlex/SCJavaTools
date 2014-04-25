@@ -155,7 +155,7 @@ public class ReflectionUtils {
 		return constructor;
 	}
 	
-	public static Method getMethod(Class<?> cls, String methodName, Object ... parameters) {
+	public static Method getMethodThatMatchesParameters(Class<?> cls, String methodName, Object ... parameters) {
 		Method method = null;
 		
 		for (Method classMethod : cls.getMethods()) {
@@ -192,7 +192,7 @@ public class ReflectionUtils {
 	 * @return true if the invoke was successful
 	 */
 	public static Object invoke(Object object, String methodName, Object ... parameters) {
-		Method method = getMethod(object.getClass(), methodName, parameters);
+		Method method = getMethodThatMatchesParameters(object.getClass(), methodName, parameters);
 		
 		if (method != null) {
 			return invoke(object, method, parameters);
