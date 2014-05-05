@@ -56,6 +56,10 @@ public class DateUtils {
 		return value;
 	}
 	
+	public static Date getDateOffsetedFromGMT(int calendarField, int amount) {
+		return getDateOffseted(currentTimeGMT(), calendarField, amount);
+	}
+	
 	public static Date getDateOffsetedFromNow(int calendarField, int amount) {
 		return getDateOffseted(new Date(), calendarField, amount);
 	}
@@ -80,7 +84,7 @@ public class DateUtils {
 		calendar.set(year, month - 1, day, 0, 0, 0);
 		return calendar.getTime();
 	}
-
+	
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
