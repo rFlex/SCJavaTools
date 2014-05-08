@@ -131,21 +131,27 @@ public class IOUtils {
 		}
 	}
 	
-	public static void writeStream(OutputStream outputStream, InputStream inputStream, byte[] buffer) throws IOException {
+	public static int writeStream(OutputStream outputStream, InputStream inputStream, byte[] buffer) throws IOException {
+		int totalWritten = 0;
 		int read = 0;
 		while ((read = inputStream.read(buffer)) > 0) {
 			outputStream.write(buffer, 0, read);
+			totalWritten += read;
 		}
+		
+		return totalWritten;
 	}
 	
-	public static void writeStream(OutputStream outputStream, InputStream inputStream) throws IOException {
-		writeStream(outputStream, inputStream, new byte[8192]);
+	public static int writeStream(OutputStream outputStream, InputStream inputStream) throws IOException {
+		return writeStream(outputStream, inputStream, new byte[8192]);
 	}
 	
-	public static void writeStream(OutputStream stream, byte[] data) throws IOException {
+	public static int writeStream(OutputStream stream, byte[] data) throws IOException {
 		final InputStream fs = new ByteArrayInputStream(data);
-		writeStream(stream, fs);
+		int totalWritten = writeStream(stream, fs);
 		fs.close();
+		
+		return totalWritten;
 	}
 
 	// //////////////////////

@@ -25,6 +25,7 @@ public class TaskQueueThread extends Thread {
 		super(target, name);
 		
 		this.taskQueue = taskQueue;
+		this.setDaemon(true);
 	}
 
 	////////////////////////

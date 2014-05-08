@@ -55,4 +55,18 @@ public class MultiThreadedTaskQueue extends TaskQueue implements Runnable {
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
+	
+	public boolean useDaemonThreads() {
+		if (this.threads.length > 0) {
+			return this.threads[0].isDaemon();
+		}
+		
+		return false;
+	}
+	
+	public void setUseDaemonThreads(boolean daemon) {
+		for (TaskQueueThread thread : this.threads) {
+			thread.setDaemon(daemon);
+		}
+	}
 }
