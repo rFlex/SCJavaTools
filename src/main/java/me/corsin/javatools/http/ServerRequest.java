@@ -320,7 +320,7 @@ public class ServerRequest {
 		return (Task<T>)this.getResponseAsync();
 	}
 	
-	public Object getResponse() throws Throwable {
+	public Object getResponse() throws IOException {
 		return this.getResponse(this.expectedResponseType);
 	}
 	

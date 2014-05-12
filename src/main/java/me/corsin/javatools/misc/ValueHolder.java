@@ -52,4 +52,8 @@ public class ValueHolder<T> {
 		this.value = value;
 	}
 	
+	public final boolean hasValue() {
+		return this.value != null;
+	}
+	
 }
