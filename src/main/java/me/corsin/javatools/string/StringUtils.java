@@ -74,6 +74,11 @@ public class StringUtils {
 		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
 	}
 	
+	public static void printObjectDescription(Object object) {
+		System.out.println(getObjectDescription(object));
+	}
+	
+	@SuppressWarnings("rawtypes")
 	public static String getObjectDescription(Object object) {
 		StringBuilder sb = new StringBuilder();
 		
@@ -81,18 +86,28 @@ public class StringUtils {
 			sb.append("null");
 		} else if (object instanceof String) {
 			sb.append((String)object);
-		} else if (object instanceof Object[]) {
-			Object[] array = (Object[])object;
+		} else if (object instanceof Iterable || object instanceof Object[]) {
 			sb.append("[");
 			
 			boolean isFirst = true;
-			for (Object obj : array) {
-				if (!isFirst) {
-					sb.append(", ");
+			if (object instanceof Iterable) {
+				for (Object obj : (Iterable)object) {
+					if (!isFirst) {
+						sb.append(", ");
+					}
+					sb.append(getObjectDescription(obj));
+					isFirst = false;
 				}
-				sb.append(getObjectDescription(obj));
-				isFirst = false;
+			} else {
+				for (Object obj : (Object[])object) {
+					if (!isFirst) {
+						sb.append(", ");
+					}
+					sb.append(getObjectDescription(obj));
+					isFirst = false;
+				}
 			}
+		
 			
 			sb.append("]");
 		} else {

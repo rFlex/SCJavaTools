@@ -35,7 +35,7 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 
 	public BatchProcessor() {
 		this.batchedEntities = new ArrayDeque<T>();
-		new Thread(this).start();;
+		new Thread(this).start();
 	}
 
 	////////////////////////
