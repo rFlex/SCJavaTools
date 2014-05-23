@@ -28,6 +28,7 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 	private int maxBatchSize;
 	private TimeSpan maxBatchInterval;
 	private BatchProcessorListener<T> listener;
+	private boolean processing;
 	
 	////////////////////////
 	// CONSTRUCTORS
@@ -42,6 +43,17 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 	// METHODS
 	////////////////
 
+	public void waitCompletion() {
+		synchronized (this.batchedEntities) {
+			while (this.processing || this.needsBatch()) {
+				try {
+					this.batchedEntities.wait();
+				} catch (InterruptedException e) {
+				}
+			}
+		}
+	}
+	
 	public void run() {
 		List<T> entityToHandle = new ArrayList<T>();
 		while (!this.closed) {
@@ -52,6 +64,7 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 				for (int i = 0; i < maxBatchSize && !this.batchedEntities.isEmpty(); i++) {
 					entityToHandle.add(this.batchedEntities.poll());
 				}
+				this.processing = true;
 			}
 			
 			if (!entityToHandle.isEmpty()) {
@@ -63,6 +76,8 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 			
 			synchronized (this.batchedEntities) {
 				if (!this.needsBatch()) {
+					this.processing = false;
+					this.batchedEntities.notify();
 					try {
 						TimeSpan maxBatchInterval = this.maxBatchInterval;
 						
@@ -79,7 +94,7 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 			}
 		}
 	}
-	
+		
 	public void addBatchEntity(T entity) {
 		synchronized (this.batchedEntities) {
 			this.batchedEntities.add(entity);
@@ -128,5 +143,9 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 
 	public void setMaxBatchSize(int maxBatchSize) {
 		this.maxBatchSize = maxBatchSize;
+	}
+	
+	public boolean isProcessing() {
+		return this.processing;
 	}
 }
