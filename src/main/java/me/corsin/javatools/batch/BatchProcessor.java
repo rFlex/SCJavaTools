@@ -26,9 +26,11 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 	private Queue<T> batchedEntities;
 	private boolean closed;
 	private int maxBatchSize;
+	private int minBatchSize;
 	private TimeSpan maxBatchInterval;
 	private BatchProcessorListener<T> listener;
 	private boolean processing;
+	private Object userInfo;
 	
 	////////////////////////
 	// CONSTRUCTORS
@@ -45,7 +47,7 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 
 	public void waitCompletion() {
 		synchronized (this.batchedEntities) {
-			while (this.processing || this.needsBatch()) {
+			while ((this.processing || this.needsBatch()) && !this.closed) {
 				try {
 					this.batchedEntities.wait();
 				} catch (InterruptedException e) {
@@ -75,7 +77,7 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 			}
 			
 			synchronized (this.batchedEntities) {
-				if (!this.needsBatch()) {
+				while (!this.needsBatch() && !this.closed) {
 					this.processing = false;
 					this.batchedEntities.notify();
 					try {
@@ -118,7 +120,7 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 	////////////////
 	
 	private boolean needsBatch() {
-		return this.batchedEntities.size() >= this.maxBatchSize && !this.closed;
+		return this.batchedEntities.size() > this.minBatchSize;
 	}
 	
 	public TimeSpan getMaxBatchInterval() {
@@ -145,7 +147,23 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 		this.maxBatchSize = maxBatchSize;
 	}
 	
+	public int getMinBatchSize() {
+		return minBatchSize;
+	}
+
+	public void setMinBatchSize(int minBatchSize) {
+		this.minBatchSize = minBatchSize;
+	}
+
 	public boolean isProcessing() {
 		return this.processing;
+	}
+
+	public Object getUserInfo() {
+		return userInfo;
+	}
+
+	public void setUserInfo(Object userInfo) {
+		this.userInfo = userInfo;
 	}
 }
