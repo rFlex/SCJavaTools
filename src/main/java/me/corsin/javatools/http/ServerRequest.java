@@ -64,6 +64,10 @@ public class ServerRequest {
 	// CONSTRUCTORS
 	////////////////
 	
+	public ServerRequest() {
+		this(null, null, null);
+	}
+	
 	public ServerRequest(String url) {
 		this(null, url);
 	}
@@ -303,8 +307,9 @@ public class ServerRequest {
 			}
 		};
 		
-		if (this.getTaskQueue() != null) {
-			this.getTaskQueue().executeAsync(task);
+		TaskQueue taskQueue = this.getTaskQueue();
+		if (taskQueue != null) {
+			taskQueue.executeAsync(task);
 		} else {
 			new Thread(task).start();
 		}

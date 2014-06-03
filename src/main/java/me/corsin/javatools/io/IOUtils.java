@@ -37,9 +37,12 @@ public class IOUtils {
 	// //////////////
 
 	public static void closeStream(Closeable stream) {
-		try {
-			stream.close();
-		} catch (IOException e) {
+		if (stream != null) {
+			try {
+				stream.close();
+			} catch (IOException e) {
+				
+			}
 		}
 	}
 	

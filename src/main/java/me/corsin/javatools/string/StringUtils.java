@@ -56,7 +56,7 @@ public class StringUtils {
     }
     
 	public static String randomString(int minSize, int maxSize) {
-		final Random random = new Random();
+		final Random random = new Random(new Date().getTime());
 		
 		int stringSize = random.nextInt(maxSize - minSize) + minSize;
 		
@@ -95,7 +95,9 @@ public class StringUtils {
 					if (!isFirst) {
 						sb.append(", ");
 					}
+					sb.append('"');
 					sb.append(getObjectDescription(obj));
+					sb.append('"');
 					isFirst = false;
 				}
 			} else {
@@ -103,7 +105,9 @@ public class StringUtils {
 					if (!isFirst) {
 						sb.append(", ");
 					}
+					sb.append('"');
 					sb.append(getObjectDescription(obj));
+					sb.append('"');
 					isFirst = false;
 				}
 			}
