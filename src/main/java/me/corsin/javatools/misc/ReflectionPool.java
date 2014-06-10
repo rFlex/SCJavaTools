@@ -21,11 +21,12 @@ public class ReflectionPool<T> extends Pool<T> {
 	// CONSTRUCTORS
 	////////////////
 	
+	public ReflectionPool() {
+		
+	}
+	
 	public ReflectionPool(Class<T> objectClass) {
-		if (objectClass == null) {
-			throw new NullArgumentException("objectClass");
-		}
-		this.objectClass = objectClass;
+		this.setObjectClass(objectClass);
 	}
 
 	////////////////////////
@@ -34,17 +35,26 @@ public class ReflectionPool<T> extends Pool<T> {
 	
 	@Override
 	protected T instantiate() {
+		if (this.objectClass == null) {
+			throw new NullArgumentException("No objectClass set inside the reflection pool");
+		}
+		
 		try {
 			return this.objectClass.newInstance();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			throw new RuntimeException("Unable to instantiate class " + objectClass.getSimpleName(), e);
 		}
-		return null;
 	}
 
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
+	
+	public Class<T> getObjectClass() {
+		return objectClass;
+	}
+
+	public void setObjectClass(Class<T> objectClass) {
+		this.objectClass = objectClass;
+	}	
 }

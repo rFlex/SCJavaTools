@@ -1,17 +1,17 @@
 /////////////////////////////////////////////////
 // Project : SCJavaTools
 // Package : me.corsin.javatools.misc
-// SynchronizedPool.java
+// SynchronizedReflectionPool.java
 //
 // Author : Simon CORSIN <simoncorsin@gmail.com>
-// File created on Nov 17, 2013 at 7:15:59 PM
+// File created on Jun 9, 2014 at 10:00:04 PM
 ////////
 
 package me.corsin.javatools.misc;
 
 import me.corsin.javatools.misc.ValueHolder.BooleanHolder;
 
-public abstract class SynchronizedPool<T> extends Pool<T> {
+public class SynchronizedReflectionPool<T> extends ReflectionPool<T> {
 
 	////////////////////////
 	// VARIABLES
@@ -22,10 +22,8 @@ public abstract class SynchronizedPool<T> extends Pool<T> {
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-	
-	public SynchronizedPool() {
-		super();
-		
+
+	public SynchronizedReflectionPool() {
 		this.lock = new Object();
 	}
 
@@ -33,14 +31,12 @@ public abstract class SynchronizedPool<T> extends Pool<T> {
 	// METHODS
 	////////////////
 	
-	@Override
 	public T obtain(BooleanHolder wasInstanciatedHolder) {
 		synchronized (this.lock) {
 			return super.obtain(wasInstanciatedHolder);
 		}
 	}
-	
-	
+
 	public void release(T obj) {
 		synchronized (this.lock) {
 			super.release(obj);

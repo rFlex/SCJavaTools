@@ -11,6 +11,8 @@ package me.corsin.javatools.misc;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import me.corsin.javatools.misc.ValueHolder.BooleanHolder;
+
 public abstract class Pool<T> {
 
 	////////////////////////
@@ -36,6 +38,10 @@ public abstract class Pool<T> {
 	abstract protected T instantiate();
 	
 	public T obtain() {
+		return this.obtain(null);
+	}
+	
+	public T obtain(BooleanHolder wasInstanciatedHolder) {
 		T obj = null;
 
 		boolean wasInstanciated = false;
@@ -53,6 +59,10 @@ public abstract class Pool<T> {
 			if (wasInstanciated) {
 				poolable.reset();
 			}
+		}
+		
+		if (wasInstanciatedHolder != null) {
+			wasInstanciatedHolder.setValue(wasInstanciated);
 		}
 		
 		return obj;
@@ -101,5 +111,9 @@ public abstract class Pool<T> {
 
 	public final void setMaxObjects(int maxObjects) {
 		this.maxObjects = maxObjects;
+
+		while (maxObjects > this.objects.size()) {
+			this.objects.remove();
+		}
 	}
 }
