@@ -9,11 +9,9 @@
 
 package me.corsin.javatools.cache;
 
-import java.util.Calendar;
-import java.util.Date;
-
-import me.corsin.javatools.date.DateUtils;
 import me.corsin.javatools.timer.TimeSpan;
+
+import org.joda.time.DateTime;
 
 public class CacheEntry<T> {
 
@@ -22,8 +20,8 @@ public class CacheEntry<T> {
 	////////////////
 	
 	private T object;
-	private Date lastRefreshedDate;
-	private Date nextRefreshDate;
+	private DateTime lastRefreshedDate;
+	private DateTime nextRefreshDate;
 	private int refreshIntervalSeconds;
 	private CacheEntryRefresher<T> refresher;
 
@@ -55,8 +53,8 @@ public class CacheEntry<T> {
 	public T getUpToDateObject(CacheEntryRefresher<T> refresher) throws Exception {
 		boolean shouldRefresh = false;
 		
-		Date currentTime = DateUtils.currentTimeGMT();
-		if (lastRefreshedDate == null || this.nextRefreshDate.before(currentTime)) {
+		DateTime currentTime = DateTime.now();
+		if (lastRefreshedDate == null || this.nextRefreshDate.isBefore(currentTime)) {
 			shouldRefresh = true;
 		}
 		
@@ -64,7 +62,7 @@ public class CacheEntry<T> {
 			if (refresher != null) {
 				this.object = refresher.refreshData();
 				this.lastRefreshedDate = currentTime;
-				this.nextRefreshDate = DateUtils.getDateOffseted(this.lastRefreshedDate, Calendar.SECOND, this.refreshIntervalSeconds);
+				this.nextRefreshDate = this.lastRefreshedDate.plusSeconds(this.refreshIntervalSeconds);
 			}
 		}
 		
@@ -83,7 +81,7 @@ public class CacheEntry<T> {
 		this.object = object;
 	}
 
-	public Date getLastRefreshedDate() {
+	public DateTime getLastRefreshedDate() {
 		return lastRefreshedDate;
 	}
 
@@ -103,7 +101,7 @@ public class CacheEntry<T> {
 		this.refreshIntervalSeconds = refreshIntervalSeconds;
 	}
 
-	public Date getNextRefreshDate() {
+	public DateTime getNextRefreshDate() {
 		return nextRefreshDate;
 	}
 

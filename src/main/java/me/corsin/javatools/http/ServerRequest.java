@@ -17,18 +17,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import me.corsin.javatools.date.DateUtils;
 import me.corsin.javatools.http.APICommunicator.IResponseTransformer;
 import me.corsin.javatools.properties.InvalidConfigurationException;
 import me.corsin.javatools.properties.SharedProperties;
 import me.corsin.javatools.task.Task;
 import me.corsin.javatools.task.TaskQueue;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 public class ServerRequest {
 	
@@ -156,8 +158,8 @@ public class ServerRequest {
 	
 	public ServerRequest addParameter(String name, Object[] params) {
 		for (Object param : params) {
-			if (param instanceof Date) {
-				this.addParameter(name, (Date)param);
+			if (param instanceof DateTime) {
+				this.addParameter(name, (DateTime)param);
 			} else {
 				this.addParameter(name, param);
 			}
@@ -175,8 +177,10 @@ public class ServerRequest {
 		return this.addParameter(name, value.toString());
 	}
 	
-	public ServerRequest addParameter(String name, Date date) {
-		this.addParameter(name, DateUtils.toISO8601String(date));
+	public ServerRequest addParameter(String name, DateTime date) {
+		DateTimeFormatter fmt = ISODateTimeFormat.dateTime();
+		
+		this.addParameter(name, fmt.print(date));
 		
 		return this;
 	}
