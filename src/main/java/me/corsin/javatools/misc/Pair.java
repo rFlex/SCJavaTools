@@ -36,24 +36,18 @@ public class Pair<T, T2> {
     ////////////////
 
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) return false;
-        else if (!(obj instanceof Pair)) return false;
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Pair)) return false;
+        Pair pair = (Pair) o;
+        return !(first != null ? !first.equals(pair.first) : pair.first != null) && !(second != null ? !second.equals(pair.second) : pair.second != null);
+    }
 
-        Pair<?, ?> pair = (Pair<?, ?>) obj;
-        if (this.first == null) {
-            if (pair.getFirst() != null) return false;
-        } else {
-            if (!first.equals(pair.getFirst())) return false;
-        }
-
-        if (this.second == null) {
-            if (pair.getSecond() != null) return false;
-        } else {
-            if (!second.equals(pair.getSecond())) return false;
-        }
-
-        return true;
+    @Override
+    public int hashCode() {
+        int result = first != null ? first.hashCode() : 0;
+        result = 31 * result + (second != null ? second.hashCode() : 0);
+        return result;
     }
 
 
