@@ -81,6 +81,10 @@ public class ServerRequest {
 	}
 	
 	public ServerRequest(Class<?> expectedResponseNodeType, String url, HttpMethod requestType) {
+		if (requestType == null) {
+			requestType = HttpMethod.GET;
+		}
+		
 		this.url = url;
 		this.parameters = new ArrayList<Parameter>();
 		this.headers = new HashMap<String, String>();

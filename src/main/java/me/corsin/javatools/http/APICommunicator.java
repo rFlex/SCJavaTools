@@ -21,7 +21,9 @@ import me.corsin.javatools.io.IOUtils;
 public class APICommunicator {
 	
 	public static interface IResponseTransformer {
+		
 		Object transformResponse(InputStream inputStream, Class<?> expectedOutputResponse) throws IOException;
+		
 	}
 	
 	////////////////////////
@@ -89,6 +91,10 @@ public class APICommunicator {
 				toReceive = connection.getInputStream();
 			} catch (IOException e) {
 				toReceive = connection.getErrorStream();
+				
+				if (toReceive == null) {
+					throw e;
+				}
 			}
 			
 			if (this.getResponseTransformer() != null) {
@@ -96,9 +102,8 @@ public class APICommunicator {
 			} else {
 				response = IOUtils.readStreamAsString(toReceive);
 			}
-			
+
 			toReceive.close();
-			
 		} finally {
 			connection.disconnect();
 		}

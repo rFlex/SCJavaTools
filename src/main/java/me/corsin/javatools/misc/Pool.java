@@ -112,7 +112,7 @@ public abstract class Pool<T> {
 	public final void setMaxObjects(int maxObjects) {
 		this.maxObjects = maxObjects;
 
-		while (maxObjects > this.objects.size()) {
+		while (this.objects.size() > maxObjects) {
 			this.objects.remove();
 		}
 	}

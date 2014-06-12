@@ -35,11 +35,11 @@ public class Pair<T, T2> {
     // METHODS
     ////////////////
 
-    @Override
+	@Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Pair)) return false;
-        Pair pair = (Pair) o;
+        Pair<?, ?> pair = (Pair<?, ?>) o;
         return !(first != null ? !first.equals(pair.first) : pair.first != null) && !(second != null ? !second.equals(pair.second) : pair.second != null);
     }
 

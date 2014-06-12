@@ -22,8 +22,14 @@ public class SynchronizedReflectionPool<T> extends ReflectionPool<T> {
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-
+	
 	public SynchronizedReflectionPool() {
+		this(null);
+	}
+	
+	public SynchronizedReflectionPool(Class<T> cls) {
+		super(cls);
+		
 		this.lock = new Object();
 	}
 

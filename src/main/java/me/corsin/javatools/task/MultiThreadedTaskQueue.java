@@ -69,4 +69,8 @@ public class MultiThreadedTaskQueue extends TaskQueue implements Runnable {
 			thread.setDaemon(daemon);
 		}
 	}
+	
+	public int getThreadCount() {
+		return this.threads.length;
+	}
 }
