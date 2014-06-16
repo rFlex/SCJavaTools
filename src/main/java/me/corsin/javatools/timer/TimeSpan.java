@@ -13,7 +13,7 @@ public class TimeSpan {
 	////////////////////////
 	// VARIABLES
 	////////////////
-	
+
 	public final static float DAY = TimeSpan.HOUR * 24;
 	public final static float HOUR = TimeSpan.MINUTE * 60;
 	public final static float MINUTE = TimeSpan.SECOND * 60;
@@ -32,9 +32,9 @@ public class TimeSpan {
 	////////////////
 
 	public TimeSpan() {
-		
+
 	}
-	
+
 	public TimeSpan(int days, int hours, int minutes, int seconds, int milliseconds) {
 		this.setDays(days);
 		this.setHours(hours);
@@ -42,15 +42,27 @@ public class TimeSpan {
 		this.setSeconds(seconds);
 		this.setMilliseconds(milliseconds);
 	}
-	
+
 	public TimeSpan(float totalSeconds) {
 		this.setTotalSeconds(totalSeconds);
 	}
-	
+
 	////////////////////////
 	// METHODS
 	////////////////
-	
+
+	public static TimeSpan fromDays(int days) {
+		return new TimeSpan(days, 0, 0, 0, 0);
+	}
+
+	public static TimeSpan fromHours(int hours) {
+		return new TimeSpan(0, hours, 0, 0, 0);
+	}
+
+	public static TimeSpan fromMinutes(int minutes) {
+		return new TimeSpan(0, 0, minutes, 0, 0);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder date = new StringBuilder();
@@ -73,10 +85,10 @@ public class TimeSpan {
 		}
 		date.append(this.milliseconds);
 		date.append(" milliseconds");
-		
+
 		return date.toString();
 	}
-	
+
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
@@ -86,84 +98,84 @@ public class TimeSpan {
 			this.totalSeconds = this.days * DAY + this.hours * HOUR + this.minutes * MINUTE + this.seconds * SECOND + this.milliseconds * MILLISECOND;
 			this.totalSecondsDirty = false;
 		}
-		
-		return totalSeconds;
+
+		return this.totalSeconds;
 	}
-	
+
 	public long getTotalMs() {
 		return (long)(this.getTotalSeconds() * 1000f);
 	}
 
 	public TimeSpan setTotalSeconds(float totalSeconds) {
 		this.totalSeconds = totalSeconds;
-		
+
 		this.days = (int)(totalSeconds / TimeSpan.DAY);
 		totalSeconds -= this.days * TimeSpan.DAY;
-		
+
 		this.hours = (int)(totalSeconds / TimeSpan.HOUR);
 		totalSeconds -= this.hours * TimeSpan.HOUR;
-		
+
 		this.minutes = (int)(totalSeconds / TimeSpan.MINUTE);
 		totalSeconds -= this.minutes * TimeSpan.MINUTE;
-		
+
 		this.seconds = (int)totalSeconds;
 		this.milliseconds = (int)(totalSeconds * 1000f) - (this.seconds * 1000);
-		
+
 		return this;
 	}
 
 	public int getDays() {
-		return days;
+		return this.days;
 	}
 
 	public TimeSpan setDays(int days) {
 		this.days = days;
 		this.totalSecondsDirty = true;
-		
+
 		return this;
 	}
 
 	public int getHours() {
-		return hours;
+		return this.hours;
 	}
 
 	public TimeSpan setHours(int hours) {
 		this.hours = hours;
 		this.totalSecondsDirty = true;
-		
+
 		return this;
 	}
 
 	public int getMinutes() {
-		return minutes;
+		return this.minutes;
 	}
 
 	public TimeSpan setMinutes(int minutes) {
 		this.minutes = minutes;
 		this.totalSecondsDirty = true;
-		
+
 		return this;
 	}
 
 	public int getSeconds() {
-		return seconds;
+		return this.seconds;
 	}
 
 	public TimeSpan setSeconds(int seconds) {
 		this.seconds = seconds;
 		this.totalSecondsDirty = true;
-		
+
 		return this;
 	}
 
 	public int getMilliseconds() {
-		return milliseconds;
+		return this.milliseconds;
 	}
 
 	public TimeSpan setMilliseconds(int milliseconds) {
 		this.milliseconds = milliseconds;
 		this.totalSecondsDirty = true;
-		
+
 		return this;
 	}
 }
