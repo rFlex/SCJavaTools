@@ -112,7 +112,7 @@ public class TextParser {
 		while (!this.isEmpty()) {
 			char c = this.readChar();
 			
-			if (!StringUtils.contains(ignoreStr, c)) {
+			if (!Strings.contains(ignoreStr, c)) {
 				this.currentIndex--;
 				break;
 			}
@@ -175,7 +175,7 @@ public class TextParser {
 				if (c == '\'' && this.enableEscapeChar) {
 					shouldEscape = true;
 				} else {
-					boolean isIgnore = StringUtils.contains(stopString, c);
+					boolean isIgnore = Strings.contains(stopString, c);
 					
 					if (isIgnore) {
 						this.currentIndex--;

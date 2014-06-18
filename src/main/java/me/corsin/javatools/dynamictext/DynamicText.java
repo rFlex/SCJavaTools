@@ -23,35 +23,35 @@ public class DynamicText {
 	private TextCompilationUnit compilationUnit;
 	private Context context;
 	private String text;
-	
+
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-	
+
 	public DynamicText(File file) throws IOException {
 		this(IOUtils.readFileAsString(file));
 	}
-	
+
 	public DynamicText() {
 		this("");
 	}
-	
+
 	public DynamicText(String text) {
 		this(text, new Context());
 	}
-	
+
 	public DynamicText(Context context) {
 		this("", context);
 	}
-	
+
 	public DynamicText(String text, Context context) {
 		this(new TextCompilationUnit(text), context);
 	}
-	
+
 	public DynamicText(TextCompilationUnit compiledText, Context context) {
 		this.context = context;
 		this.compilationUnit = compiledText;
-		
+
 		if (context != null) {
 			this.initializeBaseExpressions(context);
 		}
@@ -60,39 +60,40 @@ public class DynamicText {
 	////////////////////////
 	// METHODS
 	////////////////
-	
+
 	private void initializeBaseExpressions(Context context) {
 		context.put("#if", new If());
 	}
-	
+
 	public void put(String key, Object value) {
 		this.context.put(key, value);
 	}
-	
+
 	public void remove(String key) {
 		this.context.remove(key);
 	}
-	
+
+	@Override
 	public String toString() {
 		if (this.context == null) {
 			return "DynamicText:{No context set}";
 		}
-		
+
 		return this.compilationUnit.renderForContext(this.context);
 	}
-	
+
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
-	
+
 	public Context getContext() {
 		return this.context;
 	}
-	
+
 	public void setContext(Context context) {
 		this.context = context;
 	}
-	
+
 	public String getText() {
 		return this.text;
 	}
@@ -107,7 +108,7 @@ public class DynamicText {
 	}
 
 	public TextCompilationUnit getCompilationUnit() {
-		return compilationUnit;
+		return this.compilationUnit;
 	}
 
 	public void setCompilationUnit(TextCompilationUnit compilationUnit) {

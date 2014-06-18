@@ -14,14 +14,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
-import me.corsin.javatools.string.StringUtils;
+import me.corsin.javatools.string.Strings;
 
 public class Randomizer {
 
 	////////////////////////
 	// VARIABLES
 	////////////////
-	
+
 	private static Random random = new Random(new Date().getTime());
 
 	////////////////////////
@@ -35,52 +35,56 @@ public class Randomizer {
 	public static int nextInt() {
 		return random.nextInt();
 	}
-	
+
+	public static boolean nextBoolean() {
+		return random.nextBoolean();
+	}
+
 	public static int nextInt(int max) {
 		return random.nextInt(max);
 	}
-	
+
 	public static int nextInt(int min, int max) {
 		return nextInt(max - min) + min;
 	}
-	
+
 	public static float nextFloat() {
 		return random.nextFloat();
 	}
-	
+
 	public static double nextDouble() {
 		return random.nextDouble();
 	}
-	
+
 	public static String randomString(int minSize, int maxSize) {
-		return StringUtils.randomString(minSize, maxSize);
+		return Strings.randomString(minSize, maxSize);
 	}
-	
+
 	public static String randomAlphaNumeric(int size) {
-		return StringUtils.randomAlphaNumericString(size);
+		return Strings.randomAlphaNumericString(size);
 	}
-	
+
 	public static <T> List<T> createRandomizedList(List<T> list) {
 		List<T> randomized = new ArrayList<T>();
 		List<T> remaining = new ArrayList<T>(list);
-		
+
 		while (!remaining.isEmpty()) {
 			int position = nextInt(remaining.size());
 			randomized.add(remaining.get(position));
 			remaining.remove(position);
 		}
-		
+
 		return randomized;
 	}
-	
+
 	public static <T> T randomElement(List<T> elements) {
 		return elements.get(random.nextInt(elements.size()));
 	}
-	
+
 	public static <T> T randomElement(T[] array) {
 		return array[random.nextInt(array.length)];
 	}
-	
+
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////

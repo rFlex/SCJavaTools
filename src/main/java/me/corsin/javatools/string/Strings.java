@@ -16,11 +16,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
-public class StringUtils {
+import me.corsin.javatools.dynamictext.DynamicText;
+
+public class Strings {
 
 	////////////////////////
 	// VARIABLES
@@ -78,14 +78,6 @@ public class StringUtils {
 
 	public static void printObjectDescription(Object object) {
 		System.out.println(getObjectDescription(object));
-	}
-
-	public static Map<String, Object> objectToMap(Object object) {
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		Class<?> cls = object.getClass();
-
-		return map;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -202,6 +194,20 @@ public class StringUtils {
 		}
 
 		return str.equals(str2);
+	}
+
+	public static String format(String format, Object... params) {
+		DynamicText dt = new DynamicText(format);
+
+		for (int i = 0; i < params.length; i++) {
+			dt.put(Integer.toString(i), params[i]);
+		}
+
+		return dt.toString();
+	}
+
+	public static void print(String format, Object... params) {
+		System.out.println(format(format, params));
 	}
 
 	////////////////////////
