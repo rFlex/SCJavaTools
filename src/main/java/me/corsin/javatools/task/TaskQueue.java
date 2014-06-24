@@ -20,7 +20,7 @@ public class TaskQueue implements Closeable {
 	////////////////////////
 	// VARIABLES
 	////////////////
-	
+
 	private static TaskQueue mainTaskQueue;
 	// This variable is notified each time a Runnable is added or when it is empty
 	final private Queue<Runnable> tasks;
@@ -32,7 +32,7 @@ public class TaskQueue implements Closeable {
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-	
+
 	public TaskQueue() {
 		this.tasks = new ArrayDeque<Runnable>();
 		this.tasksReachesZero = new Object();
@@ -42,7 +42,7 @@ public class TaskQueue implements Closeable {
 	////////////////////////
 	// METHODS
 	////////////////
-	
+
 	private Runnable getNextTask() {
 		Runnable task = null;
 		synchronized (this.tasks) {
@@ -55,10 +55,10 @@ public class TaskQueue implements Closeable {
 		}
 		return task;
 	}
-	
+
 	public boolean handleNextTask() {
 		Runnable task = this.getNextTask();
-		
+
 		if (task != null) {
 			synchronized (this.tasksReachesZero) {
 				this.runningTasks++;
@@ -68,14 +68,14 @@ public class TaskQueue implements Closeable {
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
-			
+
 			synchronized (this.tasksReachesZero) {
 				this.runningTasks--;
 				if (this.runningTasks == 0) {
 					this.tasksReachesZero.notifyAll();
 				}
 			}
-			
+
 			synchronized (task) {
 				task.notifyAll();
 			}
@@ -83,13 +83,13 @@ public class TaskQueue implements Closeable {
 		}
 		return false;
 	}
-	
+
 	public void flushTasks() {
 		while (!this.closed && this.handleNextTask()) {
-			
+
 		}
 	}
-	
+
 	@Override
 	public void close() {
 		this.closed = true;
@@ -98,16 +98,30 @@ public class TaskQueue implements Closeable {
 			this.tasks.notifyAll();
 		}
 	}
-	
+
+	protected void onTaskAdded() {
+
+	}
+
+	protected void onTaskBecameNotEmpty() {
+
+	}
+
 	public <T extends Runnable> T executeAsync(T runnable) {
 		synchronized (this.tasks) {
 			this.tasks.add(runnable);
 			// Notify that a task has been added
 			this.tasks.notifyAll();
+
+			if (this.tasks.size() == 1) {
+				this.onTaskBecameNotEmpty();
+			}
+
+			this.onTaskAdded();
 		}
 		return runnable;
 	}
-	
+
 	public <T extends Runnable> T executeSync(T runnable) {
 		synchronized (runnable) {
 			this.executeAsync(runnable);
@@ -117,10 +131,10 @@ public class TaskQueue implements Closeable {
 				e.printStackTrace();
 			}
 		}
-		
+
 		return runnable;
 	}
-	
+
 	public <T extends Runnable> T executeSyncTimed(T runnable, long inMs) {
 		try {
 			Thread.sleep(inMs);
@@ -128,27 +142,27 @@ public class TaskQueue implements Closeable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		
+
 		return runnable;
 	}
-	
+
 	public <T extends Runnable> T executeAsyncTimed(T runnable, long inMs) {
 		final Runnable theRunnable = runnable;
-		
+
 		// This implementation is not really suitable for now as the timer uses its own thread
 		// The TaskQueue itself should be able in the future to handle this without using a new thread
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
-			
+
 			@Override
 			public void run() {
-				executeAsync(theRunnable);
+				TaskQueue.this.executeAsync(theRunnable);
 			}
 		}, inMs);
-		
+
 		return runnable;
 	}
-	
+
 	protected void waitForTasks() {
 		synchronized (this.tasks) {
 			while (!this.closed && !this.hasTaskPending()) {
@@ -160,7 +174,7 @@ public class TaskQueue implements Closeable {
 			}
 		}
 	}
-	
+
 	public void waitAllTasks() {
 		synchronized (this.tasks) {
 			while (this.hasTaskPending()) {
@@ -181,16 +195,16 @@ public class TaskQueue implements Closeable {
 			}
 		}
 	}
-	
+
 	public static TaskQueue currentTaskQueue() {
 		Thread currentThread = Thread.currentThread();
 		TaskQueue taskQueue = mainTaskQueue;
-		
+
 		if (currentThread instanceof TaskQueueThread) {
 			TaskQueueThread taskQueueThread = (TaskQueueThread)currentThread;
 			taskQueue = taskQueueThread.getTaskQueue();
 		}
-		
+
 		return taskQueue;
 	}
 
@@ -201,11 +215,11 @@ public class TaskQueue implements Closeable {
 	public boolean hasTaskPending() {
 		return !this.tasks.isEmpty();
 	}
-	
+
 	public int getRunningTasks() {
 		return this.runningTasks;
 	}
-	
+
 	public boolean isClosed() {
 		return this.closed;
 	}
@@ -213,7 +227,7 @@ public class TaskQueue implements Closeable {
 	public static void setMainTaskQueue(TaskQueue taskQueue) {
 		mainTaskQueue = taskQueue;
 	}
-	
+
 	public static TaskQueue getMainTaskQueue() {
 		return mainTaskQueue;
 	}
