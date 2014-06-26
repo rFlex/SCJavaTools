@@ -69,24 +69,24 @@ public class TimeSpan {
 
 		if (this.days > 0) {
 			date.append(this.days);
-			date.append(" days ");
+			date.append("d ");
 		}
 		if (this.hours > 0) {
 			date.append(this.hours);
-			date.append(" hours ");
+			date.append("h ");
 		}
 		if (this.minutes > 0) {
 			date.append(this.minutes);
-			date.append(" minutes ");
+			date.append("m ");
 		}
 		if (this.seconds > 0) {
 			date.append(this.seconds);
-			date.append(" seconds ");
+			date.append("s ");
 		}
 		date.append(this.milliseconds);
-		date.append(" milliseconds");
+		date.append("ms");
 
-		return date.toString();
+		return date.toString().trim();
 	}
 
 	////////////////////////

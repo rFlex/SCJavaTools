@@ -9,29 +9,31 @@
 
 package me.corsin.javatools.task;
 
+
 public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListener<TaskType>> implements Runnable {
-	
+
 	////////////////////////
 	// VARIABLES
 	////////////////
-	
+
 	private Throwable thrownException;
 	private boolean completed;
-	private boolean started;
+	private boolean running;
 	private boolean canceled;
 	private boolean listenerCalled;
 	private TaskListenerType listener;
 	private Object listenerCalledLock;
 	private Object creator;
+	private TaskQueue listenerTaskQueue;
 
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-	
+
 	public AbstractTask() {
 		this(null);
 	}
-	
+
 	public AbstractTask(Object creator) {
 		this.setCreator(creator);
 		this.listenerCalledLock = new Object();
@@ -40,38 +42,50 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 	////////////////////////
 	// METHODS
 	////////////////
-	
+
 	protected abstract void handle() throws Throwable;
-	
+
 	@Override
 	public void run() {
-		this.started = true;
+		this.running = true;
 		this.listenerCalled = false;
 		try {
 			if (this.canceled) {
 				throw new Exception("Task cancelled");
 			}
-			
+
 			this.handle();
-			
+
 		} catch (Throwable e) {
 			this.thrownException = e;
 		}
 		this.completed = true;
 		this.callListener();
-		this.started = false;
+		this.running = false;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void callListener() {
 		synchronized (this.listenerCalledLock) {
-			if (!this.listenerCalled && this.getListener() != null) {
+			final TaskListenerType taskListener = this.getListener();
+			if (!this.listenerCalled && taskListener != null) {
 				this.listenerCalled = true;
-				this.getListener().onCompleted(this.getCreator(), (TaskType)this);
+
+				final TaskQueue listenerTaskQueue = this.listenerTaskQueue;
+				if (listenerTaskQueue != null) {
+					listenerTaskQueue.executeAsync(new Runnable() {
+						@Override
+						public void run() {
+							taskListener.onCompleted(AbstractTask.this.getCreator(), (TaskType)AbstractTask.this);
+						}
+					});
+				} else {
+					taskListener.onCompleted(this.getCreator(), (TaskType)this);
+				}
 			}
 		}
 	}
-	
+
 	public void waitCompletion() {
 		if (!this.completed) {
 			try {
@@ -80,13 +94,13 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 						this.wait();
 					}
 				}
-				
+
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	public void cancel() {
 		this.canceled = true;
 	}
@@ -94,35 +108,47 @@ public abstract class AbstractTask<TaskType, TaskListenerType extends ITaskListe
 	////////////////////////
 	// GETTERS/SETTERS
 	////////////////
-	
+
 	public Throwable getThrownException() {
 		this.waitCompletion();
-		return thrownException;
+		return this.thrownException;
 	}
 
 	public boolean isCompleted() {
-		return completed;
+		return this.completed;
 	}
 
 	public TaskListenerType getListener() {
-		return listener;
+		return this.listener;
 	}
 
 	public AbstractTask<TaskType, TaskListenerType> setListener(TaskListenerType listener) {
 		this.listener = listener;
-		
-		if (this.started) {
+
+		if (this.completed) {
 			this.callListener();
 		}
-		
+
 		return this;
 	}
 
 	public Object getCreator() {
-		return creator;
+		return this.creator;
 	}
 
 	public void setCreator(Object creator) {
 		this.creator = creator;
+	}
+
+	public TaskQueue getListenerTaskQueue() {
+		return this.listenerTaskQueue;
+	}
+
+	public void setListenerTaskQueue(TaskQueue listenerTaskQueue) {
+		this.listenerTaskQueue = listenerTaskQueue;
+	}
+
+	public boolean isRunning() {
+		return this.running;
 	}
 }

@@ -58,7 +58,8 @@ public class ServerRequest {
 	private HttpMethod httpMethod;
 	private Class<?> expectedResponseType;
 	private IResponseTransformer responseTransformer;
-	private TaskQueue taskQueue;
+	private TaskQueue processTaskQueue;
+	private TaskQueue completionTaskQueue;
 	private boolean hasRawData;
 	private boolean forceMultipart;
 
@@ -306,16 +307,18 @@ public class ServerRequest {
 		}
 	}
 
-	public Task<Object> getResponseAsync() {
-		Task<Object> task = new Task<Object>(this) {
+	public <T> Task<T> getResponseAsync() {
+		Task<T> task = new Task<T>(this) {
 
+			@SuppressWarnings("unchecked")
 			@Override
-			protected Object perform() throws Throwable {
-				return ServerRequest.this.getResponse();
+			protected T perform() throws Throwable {
+				return (T)ServerRequest.this.getResponse();
 			}
 		};
+		task.setListenerTaskQueue(this.getCompletionTaskQueue());
 
-		TaskQueue taskQueue = this.getTaskQueue();
+		TaskQueue taskQueue = this.getProcessTaskQueue();
 		if (taskQueue != null) {
 			taskQueue.executeAsync(task);
 		} else {
@@ -442,19 +445,27 @@ public class ServerRequest {
 		return this;
 	}
 
-	public TaskQueue getTaskQueue() {
-		return this.taskQueue;
-	}
-
-	public void setTaskQueue(TaskQueue taskQueue) {
-		this.taskQueue = taskQueue;
-	}
-
 	public boolean isForceMultipart() {
 		return this.forceMultipart;
 	}
 
 	public void setForceMultipart(boolean forceMultipart) {
 		this.forceMultipart = forceMultipart;
+	}
+
+	public TaskQueue getProcessTaskQueue() {
+		return this.processTaskQueue;
+	}
+
+	public TaskQueue getCompletionTaskQueue() {
+		return this.completionTaskQueue;
+	}
+
+	public void setProcessTaskQueue(TaskQueue processTaskQueue) {
+		this.processTaskQueue = processTaskQueue;
+	}
+
+	public void setCompletionTaskQueue(TaskQueue completionTaskQueue) {
+		this.completionTaskQueue = completionTaskQueue;
 	}
 }
