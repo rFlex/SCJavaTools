@@ -9,6 +9,13 @@
 
 package me.corsin.javatools.http;
 
+import me.corsin.javatools.http.APICommunicator.IResponseTransformer;
+import me.corsin.javatools.task.Task;
+import me.corsin.javatools.task.TaskQueue;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,16 +29,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import me.corsin.javatools.http.APICommunicator.IResponseTransformer;
-import me.corsin.javatools.properties.InvalidConfigurationException;
-import me.corsin.javatools.properties.SharedProperties;
-import me.corsin.javatools.task.Task;
-import me.corsin.javatools.task.TaskQueue;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
 public class ServerRequest {
 
 	////////////////////////
@@ -42,7 +39,8 @@ public class ServerRequest {
 		void onResponseReceived(ServerRequest request, T response, Throwable thrownException);
 	}
 
-	public interface IResponseHandler extends ITypedResponseHandler<Object> { }
+	public interface IResponseHandler extends ITypedResponseHandler<Object> {
+	}
 
 	////////////////////////
 	// VARIABLES
@@ -123,7 +121,7 @@ public class ServerRequest {
 					finalUrl.append('&');
 				}
 				try {
-					finalUrl.append(parameter.getName() + "="  + URLEncoder.encode(parameter.getValue().toString(), "UTF-8"));
+					finalUrl.append(parameter.getName() + "=" + URLEncoder.encode(parameter.getValue().toString(), "UTF-8"));
 				} catch (UnsupportedEncodingException e) {
 					e.printStackTrace();
 				}
@@ -160,7 +158,7 @@ public class ServerRequest {
 	public ServerRequest addParameter(String name, Object[] params) {
 		for (Object param : params) {
 			if (param instanceof DateTime) {
-				this.addParameter(name, (DateTime)param);
+				this.addParameter(name, (DateTime) param);
 			} else {
 				this.addParameter(name, param);
 			}
@@ -170,6 +168,7 @@ public class ServerRequest {
 
 	/**
 	 * Add a generic parameter. ToString is called on the value
+	 *
 	 * @param name
 	 * @param value
 	 * @return
@@ -199,6 +198,7 @@ public class ServerRequest {
 	 * If the value is an InputStream or a Byte[], it will be send as raw data to the server
 	 * If the value is something else, toString will be called on the object instance to get
 	 * a string representation to send to the server
+	 *
 	 * @param name
 	 * @param value
 	 * @param fileName
@@ -233,72 +233,72 @@ public class ServerRequest {
 
 	public void generate() throws MalformedURLException {
 		switch (this.getHttpMethod()) {
-		case POST:
-		case PUT:
-			this.generatedURL = new URL(this.getURL());
+			case POST:
+			case PUT:
+				this.generatedURL = new URL(this.getURL());
 
-			if (this.hasRawData || this.forceMultipart) {
-				if (this.parameters.size() > 1 || this.forceMultipart) {
-					HttpMultipartGenerator multipartGenerator = new HttpMultipartGenerator("UTF-8");
-					this.contentType = multipartGenerator.getContentType();
+				if (this.hasRawData || this.forceMultipart) {
+					if (this.parameters.size() > 1 || this.forceMultipart) {
+						HttpMultipartGenerator multipartGenerator = new HttpMultipartGenerator("UTF-8");
+						this.contentType = multipartGenerator.getContentType();
+
+						try {
+							for (Parameter parameter : this.parameters) {
+								if (parameter.isRawData()) {
+									if (parameter.getValue() instanceof InputStream) {
+										multipartGenerator.appendParameter(parameter.getName(), (InputStream) parameter.getValue(), parameter.getFileName());
+									} else if (parameter.getValue() instanceof byte[]) {
+										multipartGenerator.appendParameter(parameter.getName(), (byte[]) parameter.getValue(), parameter.getFileName());
+									} else {
+										throw new RuntimeException("Unknown raw data type");
+									}
+								} else {
+									String value = parameter.getValue().toString();
+									multipartGenerator.appendParameter(parameter.getName(), value);
+								}
+							}
+							this.body = multipartGenerator.generateBody();
+							this.contentLength = multipartGenerator.getContentLength();
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+
+					} else {
+						this.contentType = "application/octet-stream";
+						Object value = this.parameters.get(0).getValue();
+
+						if (value instanceof byte[]) {
+							this.body = new ByteArrayInputStream((byte[]) value);
+						} else {
+							this.body = (InputStream) value;
+						}
+					}
+				} else {
+					this.contentType = "application/x-www-form-urlencoded";
 
 					try {
-						for (Parameter parameter : this.parameters) {
-							if (parameter.isRawData()) {
-								if (parameter.getValue() instanceof InputStream) {
-									multipartGenerator.appendParameter(parameter.getName(), (InputStream)parameter.getValue(), parameter.getFileName());
-								} else if (parameter.getValue() instanceof byte[]) {
-									multipartGenerator.appendParameter(parameter.getName(), (byte[])parameter.getValue(), parameter.getFileName());
-								} else {
-									throw new RuntimeException("Unknown raw data type");
-								}
-							} else {
-								String value = parameter.getValue().toString();
-								multipartGenerator.appendParameter(parameter.getName(), value);
-							}
-						}
-						this.body = multipartGenerator.generateBody();
-						this.contentLength  = multipartGenerator.getContentLength();
-					} catch (IOException e) {
+						String content = this.parametersToString();
+						byte[] contentBytes = content.getBytes("UTF-8");
+						ByteArrayInputStream bais = new ByteArrayInputStream(contentBytes);
+						this.body = bais;
+						this.contentLength = contentBytes.length;
+					} catch (UnsupportedEncodingException e) {
 						e.printStackTrace();
 					}
+				}
 
+				break;
+
+			case DELETE:
+			case GET:
+				if (this.parameters.size() > 0) {
+					this.generatedURL = new URL(this.getURL() + "?" + this.parametersToString());
 				} else {
-					this.contentType = "application/octet-stream";
-					Object value = this.parameters.get(0).getValue();
-
-					if (value instanceof byte[]) {
-						this.body = new ByteArrayInputStream((byte[])value);
-					} else {
-						this.body = (InputStream)value;
-					}
+					this.generatedURL = new URL(this.getURL());
 				}
-			} else {
-				this.contentType = "application/x-www-form-urlencoded";
-
-				try {
-					String content = this.parametersToString();
-					byte[] contentBytes = content.getBytes("UTF-8");
-					ByteArrayInputStream bais = new ByteArrayInputStream(contentBytes);
-					this.body = bais;
-					this.contentLength = contentBytes.length;
-				} catch (UnsupportedEncodingException e) {
-					e.printStackTrace();
-				}
-			}
-
-			break;
-
-		case DELETE:
-		case GET:
-			if (this.parameters.size() > 0) {
-				this.generatedURL = new URL(this.getURL() + "?" + this.parametersToString());
-			} else {
-				this.generatedURL = new URL(this.getURL());
-			}
-			break;
-		default:
-			break;
+				break;
+			default:
+				break;
 		}
 
 		if (this.contentType != null) {
@@ -313,7 +313,7 @@ public class ServerRequest {
 			@SuppressWarnings("unchecked")
 			@Override
 			protected T perform() throws Throwable {
-				return (T)ServerRequest.this.getResponse();
+				return (T) ServerRequest.this.getResponse();
 			}
 		};
 		task.setListenerTaskQueue(this.getCompletionTaskQueue());
@@ -332,7 +332,7 @@ public class ServerRequest {
 	public <T> Task<T> getResponseAsync(final Class<T> responseType) {
 		this.setExpectedResponseType(responseType);
 
-		return (Task<T>)this.getResponseAsync();
+		return (Task<T>) this.getResponseAsync();
 	}
 
 	public Object getResponse() throws IOException {
@@ -347,34 +347,7 @@ public class ServerRequest {
 
 		communicator.setResponseTransformer(this.getResponseTransformer());
 
-		return (T)communicator.getResponse(this);
-	}
-
-	protected void configureResponseTransformerUsingSharedProperties(String sharedPropertyName, String sharedPropertyNameClass) {
-		Object responseTransformer = SharedProperties.getSharedInstance().get(sharedPropertyName);
-
-		if (responseTransformer == null) {
-			String jsonResponseTransformer = (String)SharedProperties.getSharedInstance().get(sharedPropertyNameClass);
-
-			if (jsonResponseTransformer != null) {
-				try {
-					responseTransformer = Class.forName(jsonResponseTransformer).newInstance();
-				} catch (Exception e) {
-					throw new InvalidConfigurationException("Unable to instantiate the response transformer class " + jsonResponseTransformer);
-				}
-			}
-		}
-
-		if (responseTransformer == null) {
-//			throw new InvalidConfigurationException("You need to have the \"" + sharedPropertyName + "\" or the " +
-//					"\"" + sharedPropertyName + "Class\" property set in the SharedProperties instance");
-		}
-
-		try {
-			this.setResponseTransformer((IResponseTransformer)responseTransformer);
-		} catch (ClassCastException e) {
-			throw new InvalidConfigurationException("The set response transformer does not implement IResponseTransformer");
-		}
+		return (T) communicator.getResponse(this);
 	}
 
 	////////////////////////
