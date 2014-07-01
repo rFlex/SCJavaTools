@@ -17,6 +17,8 @@ import java.util.List;
 
 import me.corsin.javatools.misc.Pair;
 
+import org.apache.commons.lang3.ClassUtils;
+
 public class ReflectionUtils {
 
 	////////////////////////
@@ -167,7 +169,10 @@ public class ReflectionUtils {
 					match = true;
 					for (int i = 0, length = parametersType.length; i < length; i++) {
 						if (parameters[i] != null) {
-							if (!parametersType[i].isAssignableFrom(parameters[i].getClass())) {
+							Class<?> parameterClass = parameters[i].getClass();
+							Class<?> methodParameterClass = parametersType[i];
+
+							if (!ClassUtils.isAssignable(methodParameterClass, parameterClass, true)) {
 								match = false;
 								break;
 							}
@@ -195,7 +200,11 @@ public class ReflectionUtils {
 		Method method = getMethodThatMatchesParameters(object.getClass(), methodName, parameters);
 
 		if (method != null) {
-			return invoke(object, method, parameters);
+			try {
+				return method.invoke(object, parameters);
+			} catch (Exception e) {
+				throw new RuntimeException("Unable to invoke method", e);
+			}
 		} else {
 			throw new RuntimeException("No method that matches [" + methodName + "] for class " + object.getClass().getSimpleName());
 		}
