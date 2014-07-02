@@ -183,8 +183,8 @@ public class ReflectionUtils {
 
 				if (match) {
 					method = classMethod;
+					break;
 				}
-				break;
 			}
 		}
 		return method;
