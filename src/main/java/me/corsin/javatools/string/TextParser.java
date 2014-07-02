@@ -250,6 +250,29 @@ public class TextParser {
 		return result;
 	}
 
+	public static Object getValue(String input) {
+		if (input.startsWith("\"") && input.endsWith("\"")) {
+			if (input.length() < 2) {
+				throw new InvalidTextException("String identifier not terminated");
+			}
+			return input.substring(1, input.length() - 1);
+		}
+
+		if (input.equalsIgnoreCase("true")) {
+			return true;
+		}
+		if (input.equalsIgnoreCase("false")) {
+			return false;
+		}
+
+		try {
+			return Integer.parseInt(input);
+		} catch (NumberFormatException e) {
+		}
+
+		return null;
+	}
+
 	public void back() {
 		this.currentIndex--;
 	}

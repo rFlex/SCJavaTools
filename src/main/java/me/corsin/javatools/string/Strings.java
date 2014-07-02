@@ -200,7 +200,7 @@ public class Strings {
 		DynamicText dt = new DynamicText(format);
 
 		for (int i = 0; i < params.length; i++) {
-			dt.put(Integer.toString(i), params[i]);
+			dt.put("#" + Integer.toString(i), params[i]);
 		}
 
 		return dt.toString();

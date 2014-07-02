@@ -34,25 +34,25 @@ public class ContextObjectResolver implements ObjectResolver {
 	}
 
 	public ContextObjectResolver(TextParser parser) throws IOException {
-		String variableName = parser.readUpTo(".,():").trim();
-
-		if (variableName.length() == 0) {
-			throw new InvalidTextException("Empty identifier");
-		}
-
-		this.contextVariableName = variableName;
-
-		if (this.contextVariableName.startsWith("\"") && this.contextVariableName.endsWith("\"")) {
-			if (this.contextVariableName.length() < 2) {
-				throw new InvalidTextException("String identifier not terminated");
-			}
-			this.valueConstant = this.contextVariableName.substring(1, this.contextVariableName.length() - 1);
-		} else {
+		if (parser.tryRead('@')) {
+			parser.read('(');
+			String className = parser.readUpTo(")");
 			try {
-				this.valueConstant = Integer.parseInt(variableName);
-			} catch (NumberFormatException e) {
-
+				this.valueConstant = Class.forName(className);
+			} catch (ClassNotFoundException e) {
+				throw new IOException("Unable to get class " + className, e);
 			}
+			parser.read(')');
+		} else {
+			String variableName = parser.readUpTo(".,():").trim();
+
+			if (variableName.length() == 0) {
+				throw new InvalidTextException("Empty identifier");
+			}
+
+			this.contextVariableName = variableName;
+
+			this.valueConstant = TextParser.getValue(this.contextVariableName);
 		}
 
 		while (!parser.isEmpty() && parser.tryRead('.')) {

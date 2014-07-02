@@ -18,17 +18,17 @@ public class EvaluatorExpression implements Expression {
 	////////////////////////
 	// VARIABLES
 	////////////////
-	
+
 	private ObjectResolver contextObjectResolver;
 
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
-	
+
 	public EvaluatorExpression(String evalBlock) throws IOException {
 		TextParser parser = new TextParser(evalBlock);
 		parser.readIgnore();
-		
+
 		if (parser.tryRead('?')) {
 			this.contextObjectResolver = new ConditionalObjectResolver(parser);
 		} else {
@@ -39,21 +39,28 @@ public class EvaluatorExpression implements Expression {
 	////////////////////////
 	// METHODS
 	////////////////
-	
+
+	public Object getResultForContext(Context context) {
+		if (context == null) {
+			return null;
+		}
+
+		Object object = this.contextObjectResolver.resolveForObjectAndContext(null, context);
+
+		if (object == null) {
+			return null;
+		}
+
+		return object;
+	}
+
 	@Override
 	public String renderForContext(Context context) {
-		if (context == null) {
-			return "EvaluatorExpression: {No context set}";
-		}
-		
-		Object object = this.contextObjectResolver.resolveForObjectAndContext(null, context);
-		
-		if (object == null) {
-			return "";
-		}
-		return object.toString();
+		Object object = this.getResultForContext(context);
+
+		return object != null ? object.toString() : "";
 	}
-	
+
 	@Override
 	public String toString() {
 		return this.renderForContext(null);
