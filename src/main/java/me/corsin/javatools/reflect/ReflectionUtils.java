@@ -11,6 +11,7 @@ package me.corsin.javatools.reflect;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,7 +173,7 @@ public class ReflectionUtils {
 							Class<?> parameterClass = parameters[i].getClass();
 							Class<?> methodParameterClass = parametersType[i];
 
-							if (!ClassUtils.isAssignable(methodParameterClass, parameterClass, true)) {
+							if (!ClassUtils.isAssignable(parameterClass, methodParameterClass, true)) {
 								match = false;
 								break;
 							}
@@ -202,8 +203,16 @@ public class ReflectionUtils {
 		if (method != null) {
 			try {
 				return method.invoke(object, parameters);
-			} catch (Exception e) {
+			} catch (IllegalAccessException e) {
 				throw new RuntimeException("Unable to invoke method", e);
+			} catch (IllegalArgumentException e) {
+				throw new RuntimeException("Unable to invoke method", e);
+			} catch (InvocationTargetException e) {
+				if (e.getCause() instanceof RuntimeException) {
+					throw (RuntimeException)e.getCause();
+				}
+
+				throw new RuntimeException(e.getCause());
 			}
 		} else {
 			throw new RuntimeException("No method that matches [" + methodName + "] for class " + object.getClass().getSimpleName());
