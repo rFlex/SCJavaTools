@@ -14,4 +14,18 @@ public class StackTraceUtils {
 			return null;
 		}
 	}
+
+	public static String stackTraceToHTMLString(Throwable t) {
+		return stackTraceToHTMLString(t, "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", "<br>");
+	}
+
+	public static String stackTraceToHTMLString(Throwable t, String tab, String newLine) {
+		String text = stackTraceToString(t);
+		if (text == null) {
+			return null;
+		} else {
+			return text.replace("\n", newLine)
+					.replace("\t", tab);
+		}
+	}
 }
