@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////
 // Project : JEmoji
-// Package : 
+// Package :
 // JEmojis.java
 //
 // Author : Simon CORSIN <simoncorsin@gmail.com>
@@ -43,6 +43,11 @@ public enum JEmoji {
 
 	public String getShortCode() {
 		return this.shortCode;
+	}
+
+	@Override
+	public String toString() {
+		return this.getUTF8HexString();
 	}
 
 	public static String toUTF8HexString(String str) {
