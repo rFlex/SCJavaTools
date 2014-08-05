@@ -9,13 +9,6 @@
 
 package me.corsin.javatools.http;
 
-import me.corsin.javatools.http.APICommunicator.IResponseTransformer;
-import me.corsin.javatools.task.Task;
-import me.corsin.javatools.task.TaskQueue;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +21,14 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import me.corsin.javatools.http.APICommunicator.IResponseTransformer;
+import me.corsin.javatools.task.Task;
+import me.corsin.javatools.task.TaskQueue;
+
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 
 public class ServerRequest {
 
@@ -54,6 +55,7 @@ public class ServerRequest {
 	private String url;
 	private URL generatedURL;
 	private HttpMethod httpMethod;
+	private Class<?> failureResponseType;
 	private Class<?> expectedResponseType;
 	private IResponseTransformer responseTransformer;
 	private TaskQueue processTaskQueue;
@@ -307,13 +309,13 @@ public class ServerRequest {
 		}
 	}
 
-	public <T> Task<T> getResponseAsync() {
-		Task<T> task = new Task<T>(this) {
+	public <T, T2> Task<CommunicatorResponse<T, T2>> getResponseAsync() {
+		Task<CommunicatorResponse<T, T2>> task = new Task<CommunicatorResponse<T, T2>>(this) {
 
 			@SuppressWarnings("unchecked")
 			@Override
-			protected T perform() throws Throwable {
-				return (T) ServerRequest.this.getResponse();
+			protected CommunicatorResponse<T, T2> perform() throws Throwable {
+				return (CommunicatorResponse<T, T2>)ServerRequest.this.getResponse();
 			}
 		};
 		task.setListenerTaskQueue(this.getCompletionTaskQueue());
@@ -328,26 +330,26 @@ public class ServerRequest {
 		return task;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Task<T> getResponseAsync(final Class<T> responseType) {
+	public <T, T2> Task<CommunicatorResponse<T, T2>> getResponseAsync(final Class<T> responseType, final Class<T2> failureResponseType) {
 		this.setExpectedResponseType(responseType);
+		this.setFailureResponseType(failureResponseType);
 
-		return (Task<T>) this.getResponseAsync();
+		return this.<T, T2>getResponseAsync();
 	}
 
-	public Object getResponse() throws IOException {
-		return this.getResponse(this.expectedResponseType);
+	public CommunicatorResponse<?, ?> getResponse() throws IOException {
+		return this.getResponse(this.expectedResponseType, this.failureResponseType);
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T getResponse(Class<T> responseNodeType) throws IOException {
+	public <T, T2> CommunicatorResponse<T, T2> getResponse(Class<T> responseNodeType, Class<T2> failureNodeType) throws IOException {
 		this.setExpectedResponseType(responseNodeType);
 
 		APICommunicator communicator = new APICommunicator();
 
 		communicator.setResponseTransformer(this.getResponseTransformer());
 
-		return (T) communicator.getResponse(this);
+		return communicator.getResponse(this);
 	}
 
 	////////////////////////
@@ -440,5 +442,13 @@ public class ServerRequest {
 
 	public void setCompletionTaskQueue(TaskQueue completionTaskQueue) {
 		this.completionTaskQueue = completionTaskQueue;
+	}
+
+	public Class<?> getFailureResponseType() {
+		return this.failureResponseType;
+	}
+
+	public void setFailureResponseType(Class<?> failureResponseType) {
+		this.failureResponseType = failureResponseType;
 	}
 }
