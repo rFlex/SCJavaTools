@@ -341,9 +341,17 @@ public class ServerRequest {
 		return this.getResponse(this.expectedResponseType, this.failureResponseType);
 	}
 
+	@Deprecated
+	public <T> T getResponse(Class<T> responseType) throws IOException {
+		CommunicatorResponse<T, T> response = this.getResponse(responseType, responseType);
+
+		return response.getSuccessObjectResponse() != null ? response.getSuccessObjectResponse() : response.getFailureObjectResponse();
+	}
+
 	@SuppressWarnings("unchecked")
 	public <T, T2> CommunicatorResponse<T, T2> getResponse(Class<T> responseNodeType, Class<T2> failureNodeType) throws IOException {
 		this.setExpectedResponseType(responseNodeType);
+		this.setFailureResponseType(failureNodeType);
 
 		APICommunicator communicator = new APICommunicator();
 
