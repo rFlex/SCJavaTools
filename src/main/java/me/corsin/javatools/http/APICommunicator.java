@@ -117,6 +117,7 @@ public class APICommunicator {
 			} else {
 				response.setSuccessObjectResponse(rawResponseObject);
 			}
+			response.setResponseCode(connection.getResponseCode());
 
 			toReceive.close();
 		} finally {

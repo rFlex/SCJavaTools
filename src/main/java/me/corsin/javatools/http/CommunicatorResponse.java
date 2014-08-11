@@ -17,6 +17,7 @@ public class CommunicatorResponse<T, T2> {
 
 	private T successObjectResponse;
 	private T2 failureObjectResponse;
+	private int responseCode;
 
 	////////////////////////
 	// CONSTRUCTORS
@@ -49,4 +50,14 @@ public class CommunicatorResponse<T, T2> {
 	public void setFailureObjectResponse(T2 failureObjectResponse) {
 		this.failureObjectResponse = failureObjectResponse;
 	}
+
+	public int getResponseCode() {
+		return this.responseCode;
+	}
+
+	public void setResponseCode(int responseCode) {
+		this.responseCode = responseCode;
+	}
+
+
 }
