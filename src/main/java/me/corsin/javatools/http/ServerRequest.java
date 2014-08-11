@@ -233,62 +233,67 @@ public class ServerRequest {
 		return this;
 	}
 
+	private void generateBody() {
+		if (this.hasRawData || this.forceMultipart) {
+			if (this.parameters.size() > 1 || this.forceMultipart) {
+				HttpMultipartGenerator multipartGenerator = new HttpMultipartGenerator("UTF-8");
+				this.contentType = multipartGenerator.getContentType();
+
+				try {
+					for (Parameter parameter : this.parameters) {
+						if (parameter.isRawData()) {
+							if (parameter.getValue() instanceof InputStream) {
+								multipartGenerator.appendParameter(parameter.getName(), (InputStream) parameter.getValue(), parameter.getFileName());
+							} else if (parameter.getValue() instanceof byte[]) {
+								multipartGenerator.appendParameter(parameter.getName(), (byte[]) parameter.getValue(), parameter.getFileName());
+							} else {
+								throw new RuntimeException("Unknown raw data type");
+							}
+						} else {
+							String value = parameter.getValue().toString();
+							multipartGenerator.appendParameter(parameter.getName(), value);
+						}
+					}
+					this.body = multipartGenerator.generateBody();
+					this.contentLength = multipartGenerator.getContentLength();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+
+			} else {
+				this.contentType = "application/octet-stream";
+				Object value = this.parameters.get(0).getValue();
+
+				if (value instanceof byte[]) {
+					this.body = new ByteArrayInputStream((byte[]) value);
+				} else {
+					this.body = (InputStream) value;
+				}
+			}
+		} else {
+			this.contentType = "application/x-www-form-urlencoded;charset=UTF-8";
+
+			try {
+				String content = this.parametersToString();
+				byte[] contentBytes = content.getBytes("UTF-8");
+				ByteArrayInputStream bais = new ByteArrayInputStream(contentBytes);
+				this.body = bais;
+				this.contentLength = contentBytes.length;
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 	public void generate() throws MalformedURLException {
 		switch (this.getHttpMethod()) {
 			case POST:
 			case PUT:
 				this.generatedURL = new URL(this.getURL());
 
-				if (this.hasRawData || this.forceMultipart) {
-					if (this.parameters.size() > 1 || this.forceMultipart) {
-						HttpMultipartGenerator multipartGenerator = new HttpMultipartGenerator("UTF-8");
-						this.contentType = multipartGenerator.getContentType();
-
-						try {
-							for (Parameter parameter : this.parameters) {
-								if (parameter.isRawData()) {
-									if (parameter.getValue() instanceof InputStream) {
-										multipartGenerator.appendParameter(parameter.getName(), (InputStream) parameter.getValue(), parameter.getFileName());
-									} else if (parameter.getValue() instanceof byte[]) {
-										multipartGenerator.appendParameter(parameter.getName(), (byte[]) parameter.getValue(), parameter.getFileName());
-									} else {
-										throw new RuntimeException("Unknown raw data type");
-									}
-								} else {
-									String value = parameter.getValue().toString();
-									multipartGenerator.appendParameter(parameter.getName(), value);
-								}
-							}
-							this.body = multipartGenerator.generateBody();
-							this.contentLength = multipartGenerator.getContentLength();
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
-
-					} else {
-						this.contentType = "application/octet-stream";
-						Object value = this.parameters.get(0).getValue();
-
-						if (value instanceof byte[]) {
-							this.body = new ByteArrayInputStream((byte[]) value);
-						} else {
-							this.body = (InputStream) value;
-						}
-					}
-				} else {
-					this.contentType = "application/x-www-form-urlencoded";
-
-					try {
-						String content = this.parametersToString();
-						byte[] contentBytes = content.getBytes("UTF-8");
-						ByteArrayInputStream bais = new ByteArrayInputStream(contentBytes);
-						this.body = bais;
-						this.contentLength = contentBytes.length;
-					} catch (UnsupportedEncodingException e) {
-						e.printStackTrace();
-					}
+				if (this.body == null) {
+					this.generateBody();
 				}
-
 				break;
 
 			case DELETE:
@@ -408,6 +413,12 @@ public class ServerRequest {
 
 	public InputStream getBody() {
 		return this.body;
+	}
+
+	public void setBody(InputStream inputStream, String contentType, long contentLength) {
+		this.body = inputStream;
+		this.contentType = contentType;
+		this.contentLength = contentLength;
 	}
 
 	public String getContentType() {
