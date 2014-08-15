@@ -1,16 +1,15 @@
 /////////////////////////////////////////////////
 // Project : SCJavaTools
-// Package : me.corsin.javatools.task
-// SingleThreadedTaskQueue.java
+// Package : me.corsin.javatools.timer
+// SystemTimeProvider.java
 //
 // Author : Simon CORSIN <simoncorsin@gmail.com>
-// File created on Oct 18, 2013 at 8:01:17 PM
+// File created on Aug 14, 2014 at 4:55:24 PM
 ////////
 
-package me.corsin.javatools.task;
+package me.corsin.javatools.timer;
 
-@Deprecated
-public class SingleThreadedTaskQueue extends ThreadedSequentialTaskQueue {
+public class SystemTimeProvider implements TimeProvider {
 
 	////////////////////////
 	// VARIABLES
@@ -20,12 +19,19 @@ public class SingleThreadedTaskQueue extends ThreadedSequentialTaskQueue {
 	// CONSTRUCTORS
 	////////////////
 
-	public SingleThreadedTaskQueue() {
+	public SystemTimeProvider() {
+
 	}
+
 
 	////////////////////////
 	// METHODS
 	////////////////
+
+	@Override
+	public long getCurrentTimeMs() {
+		return System.currentTimeMillis();
+	}
 
 	////////////////////////
 	// GETTERS/SETTERS

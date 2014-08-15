@@ -15,6 +15,15 @@ import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
 
+/**
+ * A TaskQueue is a very thread safe object that holds a Queue (FIFO) of tasks to process.
+ * The default implementation does not process the tasks directly, they need to be flushed using
+ * flushTasks() (for processing all the pending tasks) or handleNextTask() (for processing the next task).
+ * Tasks can be any Runnable object. If you want a TaskQueue that process the tasks automatically, you can
+ * use one of the provided subclasses ThreadedConcurrentTaskQueue, ThreadedSequentialTaskQueue or ThreadedPeriodicTaskQueue.
+ * @author simoncorsin
+ *
+ */
 public class TaskQueue implements Closeable {
 
 	////////////////////////
@@ -56,6 +65,10 @@ public class TaskQueue implements Closeable {
 		return task;
 	}
 
+	/**
+	 * Process the next pending Task synchronously.
+	 * @return true if a task has been processed, false otherwise (no task is ready to be processed)
+	 */
 	public boolean handleNextTask() {
 		Runnable task = this.getNextTask();
 
@@ -84,6 +97,9 @@ public class TaskQueue implements Closeable {
 		return false;
 	}
 
+	/**
+	 * Process synchronously every pending tasks
+	 */
 	public void flushTasks() {
 		while (!this.closed && this.handleNextTask()) {
 
@@ -99,14 +115,26 @@ public class TaskQueue implements Closeable {
 		}
 	}
 
+	/**
+	 * Called when one task has been added to the TaskQueue
+	 */
 	protected void onTaskAdded() {
 
 	}
 
+	/**
+	 * Called when the TaskQueue has now at least one pending task ready to be processed
+	 */
 	protected void onTaskBecameNotEmpty() {
 
 	}
 
+	/**
+	 * Add a Task to the queue. It will be run when flushTasks() is called (this is automatically called by
+	 * some direct subclasses like ThreadedSequentialTaskQueue)
+	 * @param the runnable to be executed
+	 * @return the runnable, as a convenience method
+	 */
 	public <T extends Runnable> T executeAsync(T runnable) {
 		synchronized (this.tasks) {
 			this.tasks.add(runnable);
@@ -122,6 +150,12 @@ public class TaskQueue implements Closeable {
 		return runnable;
 	}
 
+	/**
+	 * Add a Task to the queue and wait until it's run. It is guaranteed that the Runnable will be processed
+	 * when this method returns.
+	 * @param the runnable to be executed
+	 * @return the runnable, as a convenience method
+	 */
 	public <T extends Runnable> T executeSync(T runnable) {
 		synchronized (runnable) {
 			this.executeAsync(runnable);
@@ -135,6 +169,13 @@ public class TaskQueue implements Closeable {
 		return runnable;
 	}
 
+	/**
+	 * Add a Task to the queue and wait until it's run. The Task will be executed after "inMs" milliseconds. It is guaranteed that the Runnable will be processed
+	 * when this method returns.
+	 * @param the runnable to be executed
+	 * @param inMs The time after which the task should be processed
+	 * @return the runnable, as a convenience method
+	 */
 	public <T extends Runnable> T executeSyncTimed(T runnable, long inMs) {
 		try {
 			Thread.sleep(inMs);
@@ -145,6 +186,13 @@ public class TaskQueue implements Closeable {
 
 		return runnable;
 	}
+
+	/**
+	 * Add a Task to the queue. The Task will be executed after "inMs" milliseconds.
+	 * @param the runnable to be executed
+	 * @param inMs The time after which the task should be processed
+	 * @return the runnable, as a convenience method
+	 */
 
 	public <T extends Runnable> T executeAsyncTimed(T runnable, long inMs) {
 		final Runnable theRunnable = runnable;
@@ -163,7 +211,12 @@ public class TaskQueue implements Closeable {
 		return runnable;
 	}
 
-	protected void waitForTasks() {
+	/**
+	 * Wait until the TaskQueue has a Task ready to process. If the TaskQueue is closed this method will also return
+	 * but giving the value "false".
+	 * @return true if the TaskQueue has a Task ready to process, false if it has been closed
+	 */
+	protected boolean waitForTasks() {
 		synchronized (this.tasks) {
 			while (!this.closed && !this.hasTaskPending()) {
 				try {
@@ -173,8 +226,14 @@ public class TaskQueue implements Closeable {
 				}
 			}
 		}
+
+		return !this.closed;
 	}
 
+	/**
+	 * Wait that every pending tasks are processed.
+	 * This method will return once it has no pending task or once it has been closed
+	 */
 	public void waitAllTasks() {
 		synchronized (this.tasks) {
 			while (this.hasTaskPending()) {
@@ -196,6 +255,9 @@ public class TaskQueue implements Closeable {
 		}
 	}
 
+	/**
+	 * @return the currentTaskQueue if the current Thread was created by one of the ThreadedTaskQueue subclass
+	 */
 	public static TaskQueue currentTaskQueue() {
 		Thread currentThread = Thread.currentThread();
 		TaskQueue taskQueue = mainTaskQueue;
