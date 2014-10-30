@@ -1,9 +1,17 @@
 SCJavaTools
 ===========
 
-Heal the pain, from your ass.
+Common Java tools with various advanced modules for threading, building texts.
 
-You'll found various modules in this project that are commonly used in java projects. This include modules that handle multithreading, string tools, dynamic document creation, simple http requests api, pathfinding, reflections...
+Some modules you will find:
+- TaskQueue (multithreading)
+- Dynamic document creation
+- Simple http requests api
+- String tools
+- Pathfinding
+- Reflections
+
+...
 
 Feel free to contribute and add anything you might find useful.
 
