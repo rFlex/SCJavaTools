@@ -10,6 +10,8 @@
 package me.corsin.javatools.batch;
 
 import java.io.Closeable;
+import java.io.Flushable;
+import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.Queue;
 
 import me.corsin.javatools.timer.TimeSpan;
 
-public class BatchProcessor<T> implements Runnable, Closeable {
+public class BatchProcessor<T> implements Runnable, Closeable, Flushable {
 
 	////////////////////////
 	// VARIABLES
@@ -55,7 +57,15 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 			}
 		}
 	}
-	
+
+	@Override
+	public void flush() {
+		synchronized (this.batchedEntities) {
+			this.batchedEntities.notify();
+		}
+		this.waitCompletion();
+	}
+
 	public void run() {
 		List<T> entityToHandle = new ArrayList<T>();
 		while (!this.closed) {
@@ -166,4 +176,5 @@ public class BatchProcessor<T> implements Runnable, Closeable {
 	public void setUserInfo(Object userInfo) {
 		this.userInfo = userInfo;
 	}
+
 }

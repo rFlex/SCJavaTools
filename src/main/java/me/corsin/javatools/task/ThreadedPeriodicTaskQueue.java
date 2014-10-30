@@ -26,13 +26,14 @@ public class ThreadedPeriodicTaskQueue extends TaskQueue implements Runnable {
 	////////////////
 
 	private TimeSpan periodicTimeSpan;
+	private TaskQueueThread taskQueueThread;
 
 	////////////////////////
 	// CONSTRUCTORS
 	////////////////
 
 	public ThreadedPeriodicTaskQueue() {
-		new TaskQueueThread(this,  this, "PeriodicTaskQueueThread");
+		this.taskQueueThread = new TaskQueueThread(this,  this, "PeriodicTaskQueueThread");
 	}
 
 	////////////////////////
@@ -50,6 +51,18 @@ public class ThreadedPeriodicTaskQueue extends TaskQueue implements Runnable {
 			try {
 				Thread.sleep(timeToWait);
 			} catch (InterruptedException e) { }
+		}
+	}
+
+	@Override
+	public void close() {
+		super.close();
+
+		if (this.taskQueueThread != null) {
+			try {
+				this.taskQueueThread.join();
+			} catch (InterruptedException e) { }
+			this.taskQueueThread = null;
 		}
 	}
 

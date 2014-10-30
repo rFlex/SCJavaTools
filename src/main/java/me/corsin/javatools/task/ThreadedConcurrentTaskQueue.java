@@ -58,7 +58,14 @@ public class ThreadedConcurrentTaskQueue extends TaskQueue implements Runnable {
 	@Override
 	public void close() {
 		super.close();
-		this.threads = null;
+		if (this.threads != null) {
+			for (TaskQueueThread taskQueueThread : this.threads) {
+				try {
+					taskQueueThread.join();
+				} catch (InterruptedException e) { }
+			}
+			this.threads = null;
+		}
 	}
 
 	////////////////////////
