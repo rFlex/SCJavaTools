@@ -12,7 +12,7 @@ package me.corsin.javatools.task;
 /**
  * TaskQueue that flushes automatically when it has any task pending.
  * Tasks are processed sequentially in the same thread.
- * Order in which tasks are processed are guaranted to be the same that the order in which
+ * Order in which task are processed are guaranted to be the same that the order in which
  * they were added, one task will start to be processed after the previous one has completed
  * @author simoncorsin
  *

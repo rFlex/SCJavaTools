@@ -16,10 +16,10 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * A TaskQueue is a very thread safe object that holds a Queue (FIFO) of tasks to process.
- * The default implementation does not process the tasks directly, they need to be flushed using
- * flushTasks() (for processing all the pending tasks) or handleNextTask() (for processing the next task).
- * Tasks can be any Runnable object. If you want a TaskQueue that process the tasks automatically, you can
+ * A TaskQueue is a very thread safe object that holds a Queue (FIFO) of task to process.
+ * The default implementation does not process the task directly, they need to be flushed using
+ * flushTasks() (for processing all the pending task) or handleNextTask() (for processing the next task).
+ * Tasks can be any Runnable object. If you want a TaskQueue that process the task automatically, you can
  * use one of the provided subclasses ThreadedConcurrentTaskQueue, ThreadedSequentialTaskQueue or ThreadedPeriodicTaskQueue.
  * @author simoncorsin
  *
@@ -98,7 +98,7 @@ public class TaskQueue implements Closeable {
 	}
 
 	/**
-	 * Process synchronously every pending tasks
+	 * Process synchronously every pending task
 	 */
 	public void flushTasks() {
 		while (!this.closed && this.handleNextTask()) {
@@ -231,7 +231,7 @@ public class TaskQueue implements Closeable {
 	}
 
 	/**
-	 * Wait that every pending tasks are processed.
+	 * Wait that every pending task are processed.
 	 * This method will return once it has no pending task or once it has been closed
 	 */
 	public void waitAllTasks() {

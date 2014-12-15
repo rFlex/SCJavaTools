@@ -124,6 +124,22 @@ public class ArrayUtils {
 		return newArray;
 	}
 
+	public static <T> T[] addItems(T[] array, T[] objects) {
+		if (array == null) {
+			throw new NullArgumentException("array");
+		}
+		if (objects.length == 0) {
+			return array;
+		}
+
+		final T[] newArray = (T[])Array.newInstance(objects[0].getClass(), array.length + objects.length);
+
+		System.arraycopy(array, 0, newArray, 0, array.length);
+		System.arraycopy(objects, 0, newArray, array.length, objects.length);
+
+		return newArray;
+	}
+
 
 	////////////////////////
 	// GETTERS/SETTERS

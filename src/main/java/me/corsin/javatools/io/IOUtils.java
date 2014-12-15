@@ -148,7 +148,11 @@ public class IOUtils {
 	public static int writeStream(OutputStream outputStream, InputStream inputStream) throws IOException {
 		return writeStream(outputStream, inputStream, new byte[8192]);
 	}
-	
+
+	public static int writeStream(OutputStream stream, String str) throws IOException {
+		return writeStream(stream, str.getBytes("UTF-8"));
+	}
+
 	public static int writeStream(OutputStream stream, byte[] data) throws IOException {
 		final InputStream fs = new ByteArrayInputStream(data);
 		int totalWritten = writeStream(stream, fs);
