@@ -9,6 +9,8 @@
 
 package me.corsin.javatools.string;
 
+import me.corsin.javatools.dynamictext.DynamicText;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
@@ -17,8 +19,6 @@ import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.util.Date;
 import java.util.Random;
-
-import me.corsin.javatools.dynamictext.DynamicText;
 
 public class Strings {
 
@@ -208,6 +208,51 @@ public class Strings {
 
 	public static void print(String format, Object... params) {
 		System.out.println(format(format, params));
+	}
+
+	public static String camelCaseToSnakeCase(String camelCaseString) {
+		StringBuilder sb = new StringBuilder();
+
+		for (int i = 0, length = camelCaseString.length(); i < length; i++) {
+			char c = camelCaseString.charAt(i);
+
+			if (Character.isUpperCase(c)) {
+				c = Character.toLowerCase(c);
+				if (i != 0) {
+					sb.append('_');
+				}
+			}
+
+			sb.append(c);
+		}
+
+
+		return sb.toString();
+	}
+
+	public static String snakeCaseToCamelCase(String snakeCaseString) {
+		StringBuilder sb = new StringBuilder();
+
+		String[] names = snakeCaseString.split("_");
+		for (int i = 0; i < names.length; i++) {
+			String currentName = names[i];
+
+			if (i == 0) {
+				sb.append(currentName);
+			} else {
+				for (int j = 0; j < currentName.length(); j++) {
+					char c = currentName.charAt(j);
+
+					if (j == 0) {
+						c = Character.toUpperCase(c);
+					}
+
+					sb.append(c);
+				}
+			}
+		}
+
+		return sb.toString();
 	}
 
 	////////////////////////
