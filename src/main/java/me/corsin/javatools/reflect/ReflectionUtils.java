@@ -8,17 +8,13 @@ package me.corsin.javatools.reflect;
 // File created on Aug 20, 2013 at 1:44:09 PM
 ////////
 
+import me.corsin.javatools.misc.Pair;
+import org.apache.commons.lang3.ClassUtils;
+
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import me.corsin.javatools.misc.Pair;
-
-import org.apache.commons.lang3.ClassUtils;
 
 public class ReflectionUtils {
 
@@ -249,6 +245,34 @@ public class ReflectionUtils {
 		}
 
 		return methods.toArray(new Pair[methods.size()]);
+	}
+
+	public static Class<?> getGenericTypeParameter(Class<?> aClass, Class<?> genericClass, int index) {
+		List<Class<?>> classes = new ArrayList<>();
+		Class<?> currentCls = aClass;
+
+		while (currentCls != null && currentCls != genericClass) {
+			classes.add(currentCls);
+			currentCls = currentCls.getSuperclass();
+		}
+		Class<?> managedClass = null;
+		for (int i = classes.size() - 1; i >= 0 && managedClass == null; i--) {
+			Class<?> cls = classes.get(i);
+
+			if (cls.getGenericSuperclass() instanceof ParameterizedType) {
+				ParameterizedType type = (ParameterizedType)cls.getGenericSuperclass();
+
+				if (type.getActualTypeArguments().length > index) {
+					Type typeArgument = type.getActualTypeArguments()[index];
+
+					if (typeArgument instanceof Class) {
+						managedClass = (Class<?>)typeArgument;
+					}
+				}
+			}
+		}
+
+		return managedClass;
 	}
 
 	////////////////////////
