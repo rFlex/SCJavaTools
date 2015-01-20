@@ -250,24 +250,58 @@ public class ReflectionUtils {
 	public static Class<?> getGenericTypeParameter(Class<?> aClass, Class<?> genericClass, int index) {
 		List<Class<?>> classes = new ArrayList<>();
 		Class<?> currentCls = aClass;
+		boolean isGenericClassInterface = genericClass.isInterface();
 
-		while (currentCls != null && currentCls != genericClass) {
+		String parameterName = genericClass.getTypeParameters()[index].getName();
+		while (currentCls != null && currentCls != genericClass && genericClass.isAssignableFrom(currentCls)) {
 			classes.add(currentCls);
 			currentCls = currentCls.getSuperclass();
 		}
+
 		Class<?> managedClass = null;
+		boolean shouldCheckInInterfaces = isGenericClassInterface;
 		for (int i = classes.size() - 1; i >= 0 && managedClass == null; i--) {
 			Class<?> cls = classes.get(i);
+			ParameterizedType parameterizedType = null;
 
-			if (cls.getGenericSuperclass() instanceof ParameterizedType) {
-				ParameterizedType type = (ParameterizedType)cls.getGenericSuperclass();
+			if (shouldCheckInInterfaces) {
+				for (Type superInterface : cls.getGenericInterfaces()) {
+					if (superInterface instanceof ParameterizedType) {
+						ParameterizedType type = (ParameterizedType)superInterface;
 
-				if (type.getActualTypeArguments().length > index) {
-					Type typeArgument = type.getActualTypeArguments()[index];
-
-					if (typeArgument instanceof Class) {
-						managedClass = (Class<?>)typeArgument;
+						if (type.getRawType() instanceof Class) {
+							Class rawType = (Class)type.getRawType();
+							if (rawType.isAssignableFrom(genericClass)) {
+								shouldCheckInInterfaces = false;
+								parameterizedType = type;
+							}
+						}
 					}
+				}
+			} else {
+				if (cls.getGenericSuperclass() instanceof ParameterizedType) {
+					parameterizedType = (ParameterizedType)cls.getGenericSuperclass();
+
+					index = 0;
+					// Updating the index of the type parameter
+					for (TypeVariable typeVariable : cls.getSuperclass().getTypeParameters()) {
+						if (typeVariable.getName().equals(parameterName)) {
+							break;
+						}
+						index++;
+					}
+				}
+			}
+
+			if (parameterizedType != null && parameterizedType.getActualTypeArguments().length > index) {
+				Type typeArgument = parameterizedType.getActualTypeArguments()[index];
+
+				if (typeArgument instanceof Class) {
+					managedClass = (Class<?>)typeArgument;
+				} else if (typeArgument instanceof TypeVariable) {
+					TypeVariable typeVar = (TypeVariable)typeArgument;
+					// Updating the new name of the type parameter
+					parameterName = typeVar.getName();
 				}
 			}
 		}
